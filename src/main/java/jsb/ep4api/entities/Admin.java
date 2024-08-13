@@ -11,7 +11,7 @@ import lombok.Setter;
 public class Admin {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int adminId;
+    private Long id;
 
     @Column(name = "username")
     private String username;
@@ -25,12 +25,9 @@ public class Admin {
     @Column(name = "password")
     private String password;
 
-    public Admin(String username, String fullName, String email, String password) {
-        this.username = username;
-        this.fullName = fullName;
-        this.email = email;
-        this.password = password;
-    }
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id")
+    private Role role;
 
     public Admin() {
         super();

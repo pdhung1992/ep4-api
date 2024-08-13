@@ -5,19 +5,29 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "movie_genres")
+@Table(name = "casts")
 @Getter
 @Setter
-public class MovieGenre {
+public class Cast {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "actor_name")
+    private String actorName;
+
+    @Column(name = "character_name")
+    private String characterName;
+
+    @Column(name = "is_main")
+    private boolean isMain;
+
+    @Column(name = "image")
+    private String image;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "movie_id")
     private Movie movie;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "genre_id")
-    private Genre genre;
+
 }

@@ -11,8 +11,21 @@ import lombok.Setter;
 public class Photo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int photoId;
+    private Long id;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "title")
+    private String title;
+
+    @Column(name = "file_name")
+    private String fileName;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "visible")
+    private boolean visible;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "movie_id")
+    private Movie movie;
 }

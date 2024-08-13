@@ -11,26 +11,16 @@ import lombok.Setter;
 public class CrewMember {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int crewMemberId;
+    private Long id;
 
     @Column(name = "name")
     private String name;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "crew_role_id")
     private CrewRole crewRole;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "movie_id")
     private Movie movie;
-
-    public CrewMember() {
-        super();
-    }
-
-    public CrewMember(String name, CrewRole crewRole, Movie movie) {
-        this.name = name;
-        this.crewRole = crewRole;
-        this.movie = movie;
-    }
 }

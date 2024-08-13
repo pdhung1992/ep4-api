@@ -40,7 +40,7 @@ public class UserDetailsImp implements UserDetails {
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("User"));
         return new UserDetailsImp(
-                user.getUserId(),
+                user.getId(),
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),

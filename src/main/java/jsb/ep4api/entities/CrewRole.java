@@ -11,16 +11,8 @@ import lombok.Setter;
 public class CrewRole {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int crewRoleId;
+    private Long id;
 
-    @Column(name = "role")
-    private String role;
-
-    public CrewRole() {
-        super();
-    }
-
-    public CrewRole(String role) {
-        this.role = role;
-    }
+    @Column(name = "name")
+    private String name;
 }

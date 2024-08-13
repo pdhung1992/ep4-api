@@ -8,10 +8,10 @@ import lombok.Setter;
 @Table(name = "movie_languages")
 @Getter
 @Setter
-public class MovieLanguge {
+public class MovieLanguage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long movieLanguageId;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "movie_id")
@@ -21,12 +21,5 @@ public class MovieLanguge {
     @JoinColumn(name = "language_id")
     private Language language;
 
-    public MovieLanguge() {
-        super();
-    }
 
-    public MovieLanguge(Movie movie, Language language) {
-        this.movie = movie;
-        this.language = language;
-    }
 }

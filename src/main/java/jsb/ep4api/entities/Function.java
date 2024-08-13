@@ -5,10 +5,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "genres")
+@Table(name = "functions")
 @Getter
 @Setter
-public class Genre {
+public class Function {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -16,12 +16,22 @@ public class Genre {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "url")
+    private String url;
+
+    @Column(name = "icon")
+    private String icon;
+
     @Column(name = "description")
     private String description;
 
-    @Column(name = "slug")
-    private String slug;
+    @Column(name = "sort_order")
+    private int sortOrder;
 
     @Column(name = "delete_flag")
     private boolean deleteFlag;
+
+    public Function() {
+        super();
+    }
 }

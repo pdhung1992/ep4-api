@@ -5,22 +5,22 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "languages")
+@Table(name = "packages")
 @Getter
 @Setter
-public class Language {
+public class Package {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "package_name")
+    private String packageName;
 
-    @Column(name = "native_name")
-    private String nativeName;
+    @Column(name = "price")
+    private Double price;
 
-    @Column(name = "code")
-    private String code;
+    @Column(name = "expiration_unit")
+    private String expirationUnit;
 
     @Column(name = "slug")
     private String slug;

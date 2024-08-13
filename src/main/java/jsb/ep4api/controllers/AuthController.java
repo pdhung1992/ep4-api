@@ -1,6 +1,7 @@
 package jsb.ep4api.controllers;
 
 import jakarta.validation.Valid;
+import jsb.ep4api.constrants.Constants;
 import jsb.ep4api.entities.User;
 import jsb.ep4api.payloads.requests.UserLogInRequest;
 import jsb.ep4api.payloads.requests.UserRegisterRequest;
@@ -22,6 +23,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalTime;
+
+import static jsb.ep4api.constrants.Constants.*;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -42,7 +47,6 @@ public class AuthController {
     @PostMapping("/user/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserRegisterRequest registerRequest) {
         try {
-            System.out.println(registerRequest.getUsername());
             if (userService.checkUsername(registerRequest.getUsername())) {
                 return ResponseEntity.badRequest().body("Error: Username is already taken!");
             }
@@ -52,19 +56,23 @@ public class AuthController {
             }
 
             User newUser = new User(
-                registerRequest.getUsername(),
-                registerRequest.getFullName(),
-                registerRequest.getEmail(),
-                encoder.encode(registerRequest.getPassword()),
-                null
+                    registerRequest.getUsername(),
+                    registerRequest.getFullName(),
+                    registerRequest.getEmail(),
+                    encoder.encode(registerRequest.getPassword()),
+                    null,
+                    DEFAULT_AVATAR,
+                    DEFAULT_VERIFY_FLAG,
+                    DEFAULT_DELETE_FLAG,
+                    CURRENT_TIME
             );
 
             userService.createUser(newUser);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully!");
+            return ResponseEntity.status(HttpStatus.CREATED).body(REGISTER_SUCCESS_MESSAGE);
 
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+            return ResponseEntity.badRequest().body(REGISTER_FAIL_MESSAGE + e.getMessage());
         }
     }
 
@@ -78,7 +86,7 @@ public class AuthController {
             String jwt = jwtUtils.generateJwtToken(authentication);
             UserDetailsImp userDetails = (UserDetailsImp) authentication.getPrincipal();
 
-            return ResponseEntity.ok(new UserJwtResponse(
+            return ResponseEntity.status(HttpStatus.OK).body(new UserJwtResponse(
                 jwt,
                 userDetails.getUser_id(),
                 userDetails.getUsername(),
@@ -87,7 +95,7 @@ public class AuthController {
                 userDetails.getAvatar()
             ));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error: Incorrect username or password!");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(LOGIN_FAIL_MESSAGE);
         }
     }
 }

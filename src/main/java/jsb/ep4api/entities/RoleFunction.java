@@ -1,23 +1,28 @@
 package jsb.ep4api.entities;
 
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "movie_genres")
+@Table(name = "role_functions")
 @Getter
 @Setter
-public class MovieGenre {
+public class RoleFunction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "movie_id")
-    private Movie movie;
+    @JoinColumn(name = "role_id")
+    private Role role;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "genre_id")
-    private Genre genre;
+    @JoinColumn(name = "function_id")
+    private Function function;
+
+    public RoleFunction() {
+        super();
+    }
 }

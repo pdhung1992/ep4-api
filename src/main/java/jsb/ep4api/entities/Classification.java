@@ -5,10 +5,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "languages")
+@Table(name = "classifications")
 @Getter
 @Setter
-public class Language {
+public class Classification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -16,11 +16,11 @@ public class Language {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "native_name")
-    private String nativeName;
-
     @Column(name = "code")
     private String code;
+
+    @Column(name = "description")
+    private String description;
 
     @Column(name = "slug")
     private String slug;

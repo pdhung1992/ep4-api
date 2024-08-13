@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Date;
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -11,7 +15,7 @@ import lombok.Setter;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    private Long id;
 
     @Column(name = "username")
     private String username;
@@ -25,18 +29,34 @@ public class User {
     @Column(name = "password")
     private String password;
 
+    @Column(name = "phone")
+    private String phone;
+
     @Column(name = "avatar")
     private String avatar;
 
-    public User(String username, String fullName, String email, String password, String avatar) {
+    @Column(name = "verify_flag")
+    private boolean verifyFlag;
+
+    @Column(name = "delete_flag")
+    private boolean deleteFlag;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    public User() {
+        super();
+    }
+
+    public User(String username, String fullName, String email, String password, String phone, String avatar, boolean verifyFlag, boolean deleteFlag, LocalDateTime createdAt) {
         this.username = username;
         this.fullName = fullName;
         this.email = email;
         this.password = password;
+        this.phone = phone;
         this.avatar = avatar;
-    }
-
-    public User() {
-        super();
+        this.verifyFlag = verifyFlag;
+        this.deleteFlag = deleteFlag;
+        this.createdAt = createdAt;
     }
 }
