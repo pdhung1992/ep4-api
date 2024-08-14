@@ -16,19 +16,18 @@ public class Role {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "slug")
+    private String slug;
+
     @Column(name = "description")
     private String description;
 
-    @Column(name = "delete_flag")
-    private boolean deleteFlag;
+    @Column(name = "deleted_flag")
+    private Boolean deleteFlag;
 
-    public Role(String name, String description, boolean deleteFlag) {
-        this.name = name;
-        this.description = description;
-        this.deleteFlag = deleteFlag;
-    }
+    @Column(name = "created_at")
+    private Long createdAt;
 
-    public Role() {
-        super();
-    }
+    @Column(name = "modified_at")
+    private Long modifiedAt;
 }

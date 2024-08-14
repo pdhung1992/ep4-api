@@ -11,8 +11,8 @@ public class UserService {
     UserRepository userRepository;
 
     //Check if a username is already in use
-    public boolean checkUsername(String username){
-        return userRepository.existsByUsername(username);
+    public boolean checkPhone(String phone){
+        return userRepository.existsByPhone(phone);
     }
 
     //Check if an email is already in use

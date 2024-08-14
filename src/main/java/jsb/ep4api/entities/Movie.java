@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
 
 @Entity
 @Table(name = "movies")
@@ -40,14 +39,14 @@ public class Movie {
     @Column(name = "trailer")
     private String trailer;
 
+    @Column(name = "movie_file")
+    private String movieFile;
+
     @Column(name = "duration")
     private int duration;
 
     @Column(name = "release_year")
     private int releaseYear;
-
-    @Column(name = "director")
-    private String director;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "country_id")
@@ -62,26 +61,33 @@ public class Movie {
     private Classification classification;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "video_mode_id")
     private VideoMode videoMode;
-
-    @Column(name = "created_at")
-    private Date createdAt;
-
-    @Column(name = "updated_at")
-    private Date updatedAt;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "created_by_admin_id")
     private Admin adminCreated;
 
-    @Column(name = "show_at_home")
-    private boolean showAtHome;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "modified_by_admin_id")
+    private Admin adminModified;
 
-    @Column(name = "show")
-    private boolean show;
+    @Column(name = "is_show_at_home")
+    private boolean isShowAtHome;
+
+    @Column(name = "is_show")
+    private boolean isShow;
 
     @Column(name = "deleted_flag")
-    private boolean deletedFlag;
+    private Boolean deleteFlag;
 
+    @Column(name = "created_at")
+    private Long createdAt;
+
+    @Column(name = "modified_at")
+    private Long modifiedAt;
 }

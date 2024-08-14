@@ -24,4 +24,13 @@ public class Language {
 
     @Column(name = "slug")
     private String slug;
+
+    @Column(name = "deleted_flag")
+    private Boolean deleteFlag;
+
+    @Column(name = "created_at")
+    private Long createdAt;
+
+    @Column(name = "modified_at")
+    private Long modifiedAt;
 }

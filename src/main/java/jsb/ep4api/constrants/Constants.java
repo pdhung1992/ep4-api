@@ -30,12 +30,17 @@ public class Constants {
 
     public static final String REGISTER_SUCCESS_MESSAGE = "User registered successfully!";
     public static final String REGISTER_FAIL_MESSAGE = "Register failed! Error: ";
+    public static final String PHONE_EXIST_MESSAGE = "Phone number is already taken!";
+    public static final String EMAIL_EXIST_MESSAGE = "Email is already in use!";
+
     public static final String LOGIN_SUCCESS_MESSAGE = "User logged in successfully!";
     public static final String LOGIN_FAIL_MESSAGE = "Username or password is incorrect!";
     public static final String LOGOUT_SUCCESS_MESSAGE = "User logged out successfully!";
+
     public static final String USER_NOT_FOUND_MESSAGE = "User not found!";
     public static final String USER_UPDATED_MESSAGE = "User updated successfully!";
     public static final String USER_UPDATE_FAIL_MESSAGE = "Update failed! Error: ";
+
     public static final String USER_DELETED_MESSAGE = "User deleted successfully!";
     public static final String USER_DELETE_FAIL_MESSAGE = "Delete failed! Error: ";
 

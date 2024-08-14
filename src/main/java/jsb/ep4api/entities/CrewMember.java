@@ -23,4 +23,13 @@ public class CrewMember {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "movie_id")
     private Movie movie;
+
+    @Column(name = "deleted_flag")
+    private Boolean deleteFlag;
+
+    @Column(name = "created_at")
+    private Long createdAt;
+
+    @Column(name = "modified_at")
+    private Long modifiedAt;
 }

@@ -17,20 +17,17 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "username")
-    private String username;
-
     @Column(name = "full_name")
     private String fullName;
+
+    @Column(name = "phone")
+    private String phone;
 
     @Column(name = "email")
     private String email;
 
     @Column(name = "password")
     private String password;
-
-    @Column(name = "phone")
-    private String phone;
 
     @Column(name = "avatar")
     private String avatar;
@@ -48,8 +45,7 @@ public class User {
         super();
     }
 
-    public User(String username, String fullName, String email, String password, String phone, String avatar, boolean verifyFlag, boolean deleteFlag, LocalDateTime createdAt) {
-        this.username = username;
+    public User(String fullName, String email, String password, String phone, String avatar, boolean verifyFlag, boolean deleteFlag, LocalDateTime createdAt) {
         this.fullName = fullName;
         this.email = email;
         this.password = password;

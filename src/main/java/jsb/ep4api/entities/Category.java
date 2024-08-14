@@ -4,26 +4,25 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
-@Table(name = "packages")
+@Table(name = "categories")
 @Getter
 @Setter
-public class Package {
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "package_name")
-    private String packageName;
-
-    @Column(name = "price")
-    private Double price;
-
-    @Column(name = "expiration_unit")
-    private String expirationUnit;
+    @Column(name = "name")
+    private String name;
 
     @Column(name = "slug")
     private String slug;
+
+    @Column(name = "description")
+    private String description;
 
     @Column(name = "deleted_flag")
     private Boolean deleteFlag;

@@ -16,8 +16,8 @@ public class Function {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "url")
-    private String url;
+    @Column(name = "slug")
+    private String slug;
 
     @Column(name = "icon")
     private String icon;
@@ -28,8 +28,14 @@ public class Function {
     @Column(name = "sort_order")
     private int sortOrder;
 
-    @Column(name = "delete_flag")
-    private boolean deleteFlag;
+    @Column(name = "deleted_flag")
+    private Boolean deleteFlag;
+
+    @Column(name = "created_at")
+    private Long createdAt;
+
+    @Column(name = "modified_at")
+    private Long modifiedAt;
 
     public Function() {
         super();

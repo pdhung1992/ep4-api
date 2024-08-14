@@ -47,20 +47,19 @@ public class AuthController {
     @PostMapping("/user/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserRegisterRequest registerRequest) {
         try {
-            if (userService.checkUsername(registerRequest.getUsername())) {
-                return ResponseEntity.badRequest().body("Error: Username is already taken!");
+            if (userService.checkPhone(registerRequest.getPhone())) {
+                return ResponseEntity.badRequest().body(PHONE_EXIST_MESSAGE);
             }
 
             if (userService.checkEmail(registerRequest.getEmail())) {
-                return ResponseEntity.badRequest().body("Error: Email is already in use!");
+                return ResponseEntity.badRequest().body(EMAIL_EXIST_MESSAGE);
             }
 
             User newUser = new User(
-                    registerRequest.getUsername(),
                     registerRequest.getFullName(),
                     registerRequest.getEmail(),
                     encoder.encode(registerRequest.getPassword()),
-                    null,
+                    registerRequest.getPhone(),
                     DEFAULT_AVATAR,
                     DEFAULT_VERIFY_FLAG,
                     DEFAULT_DELETE_FLAG,

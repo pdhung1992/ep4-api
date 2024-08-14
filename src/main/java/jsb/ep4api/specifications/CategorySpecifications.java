@@ -1,4 +1,4 @@
 package jsb.ep4api.specifications;
 
-public class CommentSpecifications {
+public class CategorySpecifications {
 }

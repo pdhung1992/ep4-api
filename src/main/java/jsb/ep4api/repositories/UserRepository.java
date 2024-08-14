@@ -12,9 +12,9 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
 
-    @Query("SELECT u FROM User u WHERE u.username = :usernameOrEmail OR u.email = :usernameOrEmail")
-    Optional<User> findByUsernameOrEmail(@Param("usernameOrEmail") String usernameOrEmail);
+    @Query("SELECT u FROM User u WHERE u.phone = :phoneOrEmail OR u.email = :phoneOrEmail")
+    Optional<User> findByPhoneOrEmail(@Param("phoneOrEmail") String phoneOrEmail);
 
-    Boolean existsByUsername(String username);
+    Boolean existsByPhone(String phone);
     Boolean existsByEmail(String email);
 }

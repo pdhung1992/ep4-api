@@ -24,8 +24,8 @@ public class Review {
     @Column(name = "rating")
     private int rating;
 
-    @Column(name = "time")
-    private Date time;
+    @Column(name = "parent_id")
+    private Long parentId;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "movie_id")
@@ -34,4 +34,13 @@ public class Review {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @Column(name = "deleted_flag")
+    private Boolean deleteFlag;
+
+    @Column(name = "created_at")
+    private Long createdAt;
+
+    @Column(name = "modified_at")
+    private Long modifiedAt;
 }

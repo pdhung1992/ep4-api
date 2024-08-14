@@ -1,12 +1,11 @@
 package jsb.ep4api.services;
 
-import jsb.ep4api.repositories.MovieCastRepository;
+import jsb.ep4api.repositories.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MovieCastService {
+public class CategoryService {
     @Autowired
-    private MovieCastRepository movieCastRepository;
-
+    private CategoryRepository categoryRepository;
 }

@@ -21,5 +21,12 @@ public class MovieLanguage {
     @JoinColumn(name = "language_id")
     private Language language;
 
+    @Column(name = "deleted_flag")
+    private Boolean deleteFlag;
 
+    @Column(name = "created_at")
+    private Long createdAt;
+
+    @Column(name = "modified_at")
+    private Long modifiedAt;
 }

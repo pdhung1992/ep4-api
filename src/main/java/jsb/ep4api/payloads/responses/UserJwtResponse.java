@@ -8,15 +8,15 @@ import lombok.Setter;
 public class UserJwtResponse {
     private String token;
     private Long id;
-    private String username;
+    private String phone;
     private String email;
     private String fullName;
     private String avatar;
 
-    public UserJwtResponse(String token, Long id, String username, String email, String fullName, String avatar) {
+    public UserJwtResponse(String token, Long id, String phone, String email, String fullName, String avatar) {
         this.token = token;
         this.id = id;
-        this.username = username;
+        this.phone = phone;
         this.email = email;
         this.fullName = fullName;
         this.avatar = avatar;

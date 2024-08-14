@@ -20,4 +20,13 @@ public class MovieGenre {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "genre_id")
     private Genre genre;
+
+    @Column(name = "deleted_flag")
+    private Boolean deleteFlag;
+
+    @Column(name = "created_at")
+    private Long createdAt;
+
+    @Column(name = "modified_at")
+    private Long modifiedAt;
 }

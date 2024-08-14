@@ -25,6 +25,18 @@ public class Admin {
     @Column(name = "password")
     private String password;
 
+    @Column(name = "avatar")
+    private String avatar;
+
+    @Column(name = "deleted_flag")
+    private Boolean deleteFlag;
+
+    @Column(name = "created_at")
+    private Long createdAt;
+
+    @Column(name = "modified_at")
+    private Long modifiedAt;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
     private Role role;

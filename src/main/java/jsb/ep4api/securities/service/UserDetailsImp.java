@@ -17,7 +17,7 @@ import java.util.List;
 public class UserDetailsImp implements UserDetails {
 
     private Long user_id;
-    private String username;
+    private String phone;
     private String email;
     @JsonIgnore
     private String password;
@@ -26,9 +26,9 @@ public class UserDetailsImp implements UserDetails {
 
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserDetailsImp(Long user_id, String username, String email, String password, String fullName, String avatar, Collection<? extends GrantedAuthority> authorities) {
+    public UserDetailsImp(Long user_id, String phone, String email, String password, String fullName, String avatar, Collection<? extends GrantedAuthority> authorities) {
         this.user_id = user_id;
-        this.username = username;
+        this.phone = phone;
         this.email = email;
         this.password = password;
         this.fullName = fullName;
@@ -41,7 +41,7 @@ public class UserDetailsImp implements UserDetails {
         authorities.add(new SimpleGrantedAuthority("User"));
         return new UserDetailsImp(
                 user.getId(),
-                user.getUsername(),
+                user.getPhone(),
                 user.getEmail(),
                 user.getPassword(),
                 user.getFullName(),
@@ -57,7 +57,7 @@ public class UserDetailsImp implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return phone;
     }
 
     @Override
