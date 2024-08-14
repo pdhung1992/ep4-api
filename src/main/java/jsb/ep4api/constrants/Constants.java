@@ -1,7 +1,8 @@
 package jsb.ep4api.constrants;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
+
+import static java.util.stream.IntStream.rangeClosed;
 
 public class Constants {
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
@@ -14,6 +15,8 @@ public class Constants {
     public static final int DEFAULT_PAGE_SIZE = 10;
     public static final String DEFAULT_SORT_BY = "id";
     public static final String DEFAULT_SORT_ORDER = "asc";
+
+    public static final int[] SORT_ORDERS = rangeClosed(1, 20).toArray();
 
     public static final String[] USER_PACKAGES = {"FREE", "BASIC", "PREMIUM", "VIP"};
 
