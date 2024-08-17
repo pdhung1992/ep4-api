@@ -5,24 +5,25 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UserJwtResponse {
+public class AdminJwtResponse {
     private String token;
     private Long id;
-    private String phone;
+    private String username;
     private String email;
     private String fullName;
     private String avatar;
+    private String role;
 
-    public UserJwtResponse(String token, Long id, String phone, String email, String fullName, String avatar) {
+    public AdminJwtResponse(String token, Long id, String username, String email, String fullName, String avatar, String role) {
         this.token = token;
         this.id = id;
-        this.phone = phone;
+        this.username = username;
         this.email = email;
         this.fullName = fullName;
         this.avatar = avatar;
+        this.role = role;
     }
 
-    public UserJwtResponse() {
+    public AdminJwtResponse() {
     }
-
 }

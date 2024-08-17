@@ -33,6 +33,13 @@ public class Constants {
     public static final String PHONE_EXIST_MESSAGE = "Phone number is already taken!";
     public static final String EMAIL_EXIST_MESSAGE = "Email is already in use!";
 
+    public static final String CREATE_ADMIN_SUCCESS_MESSAGE = "Admin created successfully!";
+    public static final String CREATE_ADMIN_FAIL_MESSAGE = "Create failed! Error: ";
+    public static final String USERNAME_NOT_FOUND_MESSAGE = "Username not found!";
+    public static final String USERNAME_EXIST_MESSAGE = "Username is already taken!";
+
+    public static final String ROLE_NOT_FOUND_MESSAGE = "Role not found!";
+
     public static final String LOGIN_SUCCESS_MESSAGE = "User logged in successfully!";
     public static final String LOGIN_FAIL_MESSAGE = "Username or password is incorrect!";
     public static final String LOGOUT_SUCCESS_MESSAGE = "User logged out successfully!";

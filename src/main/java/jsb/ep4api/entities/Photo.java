@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "photos")
 @Getter
@@ -33,8 +35,8 @@ public class Photo {
     private Boolean deleteFlag;
 
     @Column(name = "created_at")
-    private Long createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "modified_at")
-    private Long modifiedAt;
+    private LocalDateTime modifiedAt;
 }

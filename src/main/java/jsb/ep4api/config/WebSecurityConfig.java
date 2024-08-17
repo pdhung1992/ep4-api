@@ -2,6 +2,7 @@ package jsb.ep4api.config;
 
 import jsb.ep4api.securities.jwt.AuthEntryPointJwt;
 import jsb.ep4api.securities.jwt.AuthTokenFilter;
+import jsb.ep4api.securities.service.AdminDetailsServiceImp;
 import jsb.ep4api.securities.service.UserDetailsServiceImp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +30,8 @@ public class WebSecurityConfig {
 
     @Autowired
     UserDetailsServiceImp userDetailsService;
+    @Autowired
+    AdminDetailsServiceImp adminDetailsService;
 
     @Autowired
     AuthEntryPointJwt unauthorizedHandler;
@@ -36,8 +39,20 @@ public class WebSecurityConfig {
     @Bean
     public DaoAuthenticationProvider userAuthenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
+
+        return authProvider;
+    }
+
+    @Bean
+    public DaoAuthenticationProvider adminAuthenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+
+        authProvider.setUserDetailsService(adminDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+
         return authProvider;
     }
 
@@ -45,6 +60,7 @@ public class WebSecurityConfig {
     public AuthenticationManager authenticationManagerBean(AuthenticationConfiguration auConfig, HttpSecurity http) throws Exception {
         return http.getSharedObject(AuthenticationManagerBuilder.class)
                 .authenticationProvider(userAuthenticationProvider())
+                .authenticationProvider(adminAuthenticationProvider())
                 .build();
     }
 
@@ -70,10 +86,14 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/auth/user/register").permitAll()
                         .requestMatchers("/api/auth/user/login").permitAll()
 
+                        .requestMatchers("/api/auth/admin/create").permitAll()
+                        .requestMatchers("/api/auth/admin/login").permitAll()
+
                         .anyRequest().authenticated()
                 );
 
         http.authenticationProvider(userAuthenticationProvider());
+        http.authenticationProvider(adminAuthenticationProvider());
 
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();

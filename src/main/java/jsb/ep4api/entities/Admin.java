@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "admins")
 @Getter
@@ -32,10 +34,10 @@ public class Admin {
     private Boolean deleteFlag;
 
     @Column(name = "created_at")
-    private Long createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "modified_at")
-    private Long modifiedAt;
+    private LocalDateTime modifiedAt;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")

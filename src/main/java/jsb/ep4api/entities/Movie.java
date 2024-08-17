@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 
 @Entity
 @Table(name = "movies")
@@ -29,6 +31,9 @@ public class Movie {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "package_id")
     private Package aPackage;
+
+    @Column(name = "views")
+    private Long views;
 
     @Column(name = "storyline")
     private String storyline;
@@ -86,8 +91,8 @@ public class Movie {
     private Boolean deleteFlag;
 
     @Column(name = "created_at")
-    private Long createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "modified_at")
-    private Long modifiedAt;
+    private LocalDateTime modifiedAt;
 }

@@ -3,6 +3,7 @@ package jsb.ep4api.securities.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jsb.ep4api.securities.service.AdminDetailsImp;
 import jsb.ep4api.securities.service.UserDetailsImp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,12 +31,28 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }
 
-    public String generateJwtToken(Authentication authentication) {
+    public String generateUserJwtToken(Authentication authentication) {
         UserDetailsImp userPrincipal = (UserDetailsImp) authentication.getPrincipal();
 
         Claims claims = Jwts.claims().setSubject(userPrincipal.getUsername());
         claims.put("authorities", userPrincipal.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
         claims.put("email", userPrincipal.getEmail());
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .signWith(key(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String generateAdminJwtToken(Authentication authentication) {
+        AdminDetailsImp adminPrincipal = (AdminDetailsImp) authentication.getPrincipal();
+
+        Claims claims = Jwts.claims().setSubject(adminPrincipal.getUsername());
+        claims.put("authorities", adminPrincipal.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
+        claims.put("email", adminPrincipal.getEmail());
+        claims.put("role", adminPrincipal.getRole().getName());
 
         return Jwts.builder()
                 .setClaims(claims)

@@ -35,24 +35,28 @@ public class User {
     @Column(name = "verify_flag")
     private boolean verifyFlag;
 
-    @Column(name = "delete_flag")
-    private boolean deleteFlag;
+    @Column(name = "deleted_flag")
+    private Boolean deleteFlag;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "modified_at")
+    private LocalDateTime modifiedAt;
 
     public User() {
         super();
     }
 
-    public User(String fullName, String email, String password, String phone, String avatar, boolean verifyFlag, boolean deleteFlag, LocalDateTime createdAt) {
+    public User(String fullName, String phone, String email, String password, String avatar, boolean verifyFlag, Boolean deleteFlag, LocalDateTime createdAt, LocalDateTime modifiedAt) {
         this.fullName = fullName;
+        this.phone = phone;
         this.email = email;
         this.password = password;
-        this.phone = phone;
         this.avatar = avatar;
         this.verifyFlag = verifyFlag;
         this.deleteFlag = deleteFlag;
         this.createdAt = createdAt;
+        this.modifiedAt = modifiedAt;
     }
 }

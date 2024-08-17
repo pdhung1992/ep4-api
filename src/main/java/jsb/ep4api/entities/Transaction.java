@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
@@ -25,10 +26,10 @@ public class Transaction {
     private String content;
 
     @Column(name = "trans_time")
-    private LocalTime transTime;
+    private LocalDateTime transTime;
 
     @Column(name = "expired_time")
-    private LocalTime expiredTime;
+    private LocalDateTime expiredTime;
 
     @Column(name = "is_expired")
     private Boolean isExpired;
