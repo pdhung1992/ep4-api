@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jsb.ep4api.securities.service.AdminDetailsImp;
+//import jsb.ep4api.securities.service.CustomUserDetails;
 import jsb.ep4api.securities.service.UserDetailsImp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,7 @@ public class JwtUtils {
 
         Claims claims = Jwts.claims().setSubject(userPrincipal.getUsername());
         claims.put("authorities", userPrincipal.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
-        claims.put("email", userPrincipal.getEmail());
+        claims.put("phoneOrEmail", userPrincipal.getPhoneOrEmail());
 
         return Jwts.builder()
                 .setClaims(claims)

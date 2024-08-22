@@ -21,6 +21,9 @@ public class Role {
     @Column(name = "slug")
     private String slug;
 
+    @Column(name = "bs_color")
+    private String bsColor;
+
     @Column(name = "description")
     private String description;
 
@@ -32,4 +35,18 @@ public class Role {
 
     @Column(name = "modified_at")
     private LocalDateTime modifiedAt;
+
+    public Role() {
+        super();
+    }
+
+    public Role(String name, String slug, String bsColor, String description, Boolean deleteFlag, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+        this.name = name;
+        this.slug = slug;
+        this.bsColor = bsColor;
+        this.description = description;
+        this.deleteFlag = deleteFlag;
+        this.createdAt = createdAt;
+        this.modifiedAt = modifiedAt;
+    }
 }

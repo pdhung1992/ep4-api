@@ -30,6 +30,9 @@ public class Function {
     @Column(name = "sort_order")
     private int sortOrder;
 
+    @Column(name = "parent_id")
+    private Long parentId;
+
     @Column(name = "deleted_flag")
     private Boolean deleteFlag;
 

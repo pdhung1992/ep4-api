@@ -9,57 +9,44 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Getter
 @Setter
 public class AdminDetailsImp implements UserDetails {
+    private String username;
+    private String fullName;
+    private String email;
+    @JsonIgnore
+    private String password;
+    private String avatar;
+    private Role role;
 
-        private Long admin_id;
-        private String username;
-        private String email;
-        @JsonIgnore
-        private String password;
-        private String fullName;
-        private String avatar;
-        private Role role;
-
-        public AdminDetailsImp(Long admin_id, String username, String email, String password, String fullName, String avatar, Role role) {
-            this.admin_id = admin_id;
-            this.username = username;
-            this.email = email;
-            this.password = password;
-            this.fullName = fullName;
-            this.avatar = avatar;
-            this.role = role;
-        }
-
-        public static AdminDetailsImp build(Admin admin) {
-            return new AdminDetailsImp(
-                    admin.getId(),
-                    admin.getUsername(),
-                    admin.getEmail(),
-                    admin.getPassword(),
-                    admin.getFullName(),
-                    admin.getAvatar(),
-                    admin.getRole()
-            );
-        }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+    public AdminDetailsImp(String username, String fullName, String email, String password, String avatar, Role role, Collection<? extends GrantedAuthority> authorities) {
+        this.username = username;
+        this.fullName = fullName;
+        this.email = email;
+        this.password = password;
+        this.avatar = avatar;
+        this.role = role;
     }
 
     @Override
-        public String getPassword() {
-            return password;
-        }
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        Collection<? extends GrantedAuthority> authorities = List.of();
+        return authorities != null ? authorities : Collections.emptyList();
+    }
 
-        @Override
-        public String getUsername() {
-            return username;
-        }
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
 
     @Override
     public boolean isAccountNonExpired() {

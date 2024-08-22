@@ -5,7 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jsb.ep4api.securities.service.UserDetailsServiceImp;
+import jsb.ep4api.securities.service.CustomUserDetailsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     private JwtUtils jwtUtils;
 
     @Autowired
-    private UserDetailsServiceImp userDetailsService;
+    private CustomUserDetailsService userDetailsService;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
@@ -52,10 +52,14 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 UserDetails userDetails = null;
 
                 if (roles != null) {
-                     if (roles.contains("User")) {
+                    if (roles.contains("User")) {
+                        userDetails = userDetailsService.loadUserByUsername(username);
+                    }
+                    if (roles.contains("Admin")) {
                         userDetails = userDetailsService.loadUserByUsername(username);
                     }
                 }
+
                 List<SimpleGrantedAuthority> authorities = roles.stream()
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
