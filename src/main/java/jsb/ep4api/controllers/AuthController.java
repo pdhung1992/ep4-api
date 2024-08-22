@@ -11,13 +11,11 @@ import jsb.ep4api.payloads.responses.AdminResponse;
 import jsb.ep4api.payloads.responses.UserJwtResponse;
 import jsb.ep4api.securities.jwt.JwtUtils;
 import jsb.ep4api.securities.service.AdminDetailsImp;
-//import jsb.ep4api.securities.service.CustomUserDetails;
 import jsb.ep4api.securities.service.UserDetailsImp;
 import jsb.ep4api.services.AdminService;
 import jsb.ep4api.services.RoleService;
 import jsb.ep4api.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,8 +32,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
-import java.util.UUID;
 
 import static jsb.ep4api.constrants.Constants.*;
 
@@ -102,7 +98,6 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(loginRequest.getPhoneOrEmail(), loginRequest.getPassword())
             );
 
-            System.out.printf("Authentication: %s\n", authentication);
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwt = jwtUtils.generateUserJwtToken(authentication);
             UserDetailsImp userDetails = (UserDetailsImp) authentication.getPrincipal();
@@ -169,7 +164,12 @@ public class AuthController {
 
             AdminJwtResponse adminJwtResponse = new AdminJwtResponse();
             adminJwtResponse.setToken(jwt);
+            adminJwtResponse.setId(adminDetails.getId());
             adminJwtResponse.setUsername(adminDetails.getUsername());
+            adminJwtResponse.setEmail(adminDetails.getEmail());
+            adminJwtResponse.setFullName(adminDetails.getFullName());
+            adminJwtResponse.setRole(adminDetails.getRole().getName());
+            adminJwtResponse.setAvatar(adminDetails.getAvatar());
 
             return ResponseEntity.status(HttpStatus.OK).body(adminJwtResponse);
         }

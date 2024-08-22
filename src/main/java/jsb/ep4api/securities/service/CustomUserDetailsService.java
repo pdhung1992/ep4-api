@@ -30,7 +30,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             Optional<Admin> adminOptional = adminRepository.findByUsername(username);
             if (adminOptional.isPresent()) {
                 Admin admin = adminOptional.get();
-                return new AdminDetailsImp(admin.getUsername(), admin.getFullName(), admin.getEmail(), admin.getPassword(), admin.getAvatar(), admin.getRole(), null);
+                return new AdminDetailsImp(admin.getId(), admin.getUsername(), admin.getFullName(), admin.getEmail(), admin.getPassword(), admin.getAvatar(), admin.getRole(), null);
             }
         }
         throw new UsernameNotFoundException("User not found with username: " + username);

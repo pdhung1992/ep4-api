@@ -15,6 +15,7 @@ import java.util.List;
 @Getter
 @Setter
 public class AdminDetailsImp implements UserDetails {
+    private Long id;
     private String username;
     private String fullName;
     private String email;
@@ -23,7 +24,8 @@ public class AdminDetailsImp implements UserDetails {
     private String avatar;
     private Role role;
 
-    public AdminDetailsImp(String username, String fullName, String email, String password, String avatar, Role role, Collection<? extends GrantedAuthority> authorities) {
+    public AdminDetailsImp(Long id, String username, String fullName, String email, String password, String avatar, Role role, Collection<? extends GrantedAuthority> authorities) {
+        this.id = id;
         this.username = username;
         this.fullName = fullName;
         this.email = email;
