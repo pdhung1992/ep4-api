@@ -1,12 +1,10 @@
 package jsb.ep4api.repositories;
 
-import jsb.ep4api.entities.Function;
+import jsb.ep4api.entities.MovieFile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
-public interface FunctionRepository extends JpaRepository<Function, Long>, JpaSpecificationExecutor<Function> {
+public interface MovieFileRepository extends JpaRepository<MovieFile, Long>, JpaSpecificationExecutor<MovieFile> {
 }

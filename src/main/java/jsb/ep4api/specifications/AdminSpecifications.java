@@ -3,7 +3,7 @@ package jsb.ep4api.specifications;
 import jsb.ep4api.entities.Admin;
 import org.springframework.data.jpa.domain.Specification;
 
-import static jsb.ep4api.constrants.Constants.*;
+import static jsb.ep4api.constants.Constants.*;
 
 public class AdminSpecifications {
     public static Specification<Admin> hasUsername(String username) {

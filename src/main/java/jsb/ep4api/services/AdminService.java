@@ -11,8 +11,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import static jsb.ep4api.constrants.Constants.DEFAULT_DELETE_FLAG;
-
 @Service
 public class AdminService {
     @Autowired

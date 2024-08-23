@@ -1,4 +1,4 @@
-package jsb.ep4api.constrants;
+package jsb.ep4api.constants;
 
 import java.time.LocalDateTime;
 
@@ -10,6 +10,7 @@ public class Constants {
 
     public static final boolean DEFAULT_DELETE_FLAG = false;
     public static final boolean DEFAULT_VERIFY_FLAG = false;
+    public static final boolean DEFAULT_SHOW_FLAG = true;
 
     public static final int DEFAULT_PAGE_NUMBER = 0;
     public static final int DEFAULT_PAGE_SIZE = 10;
@@ -58,6 +59,7 @@ public class Constants {
     public static final String DELETE_ADMIN_SUCCESS_MESSAGE = "Admin deleted successfully!";
     public static final String DELETE_ADMIN_FAIL_MESSAGE = "Delete failed! Error: ";
     public static final String UPDATE_PASSWORD_SUCCESS_MESSAGE = "Password updated successfully!";
+    public static final String FUNCTION_NOT_FOUND_MESSAGE = "Function not found!";
 
     public static final String ROLE_NAME_EXIST_MESSAGE = "Role name is already taken!";
     public static final String ROLE_SLUG_EXIST_MESSAGE = "Role slug is already taken!";
@@ -67,6 +69,8 @@ public class Constants {
     public static final String UPDATE_ROLE_FAIL_MESSAGE = "Update failed! Error: ";
     public static final String DELETE_ROLE_SUCCESS_MESSAGE = "Role deleted successfully!";
     public static final String DELETE_ROLE_FAIL_MESSAGE = "Delete failed! Error: ";
+    public static final String UPDATE_ROLE_FUNCTION_SUCCESS_MESSAGE = "Role function updated successfully!";
+    public static final String UPDATE_ROLE_FUNCTION_FAIL_MESSAGE = "Update failed! Error: ";
 
 
     private Constants() {

@@ -30,6 +30,9 @@ public class Function {
     @Column(name = "sort_order")
     private int sortOrder;
 
+    @Column(name = "is_show")
+    private Boolean isShow;
+
     @Column(name = "parent_id")
     private Long parentId;
 

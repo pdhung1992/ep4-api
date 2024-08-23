@@ -1,20 +1,14 @@
 package jsb.ep4api.controllers;
 
 import jakarta.validation.Valid;
-import jsb.ep4api.entities.Admin;
-import jsb.ep4api.entities.Role;
-import jsb.ep4api.entities.User;
+import jsb.ep4api.entities.*;
 import jsb.ep4api.payloads.requests.AdminRequest;
 import jsb.ep4api.payloads.requests.UserRequest;
-import jsb.ep4api.payloads.responses.AdminJwtResponse;
-import jsb.ep4api.payloads.responses.AdminResponse;
-import jsb.ep4api.payloads.responses.UserJwtResponse;
+import jsb.ep4api.payloads.responses.*;
 import jsb.ep4api.securities.jwt.JwtUtils;
 import jsb.ep4api.securities.service.AdminDetailsImp;
 import jsb.ep4api.securities.service.UserDetailsImp;
-import jsb.ep4api.services.AdminService;
-import jsb.ep4api.services.RoleService;
-import jsb.ep4api.services.UserService;
+import jsb.ep4api.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +26,10 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Comparator;
+import java.util.List;
 
-import static jsb.ep4api.constrants.Constants.*;
+import static jsb.ep4api.constants.Constants.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -50,11 +46,14 @@ public class AuthController {
 
     @Autowired
     UserService userService;
-
     @Autowired
     private AdminService adminService;
     @Autowired
     private RoleService roleService;
+    @Autowired
+    RoleFunctionService roleFunctionService;
+    @Autowired
+    FunctionService functionService;
 
 
     //Register a new user
@@ -112,6 +111,72 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/user/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody UserRequest changeRequest) {
+        try {
+            User user = userService.findById(changeRequest.getId());
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(USER_NOT_FOUND_MESSAGE);
+            }
+
+            if (!encoder.matches(changeRequest.getPassword(), user.getPassword())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(PASSWORD_NOT_CORRECT_MESSAGE);
+            }
+
+            user.setPassword(encoder.encode(changeRequest.getNewPassword()));
+            user.setModifiedAt(CURRENT_TIME);
+
+            userService.updateUser(user);
+
+            return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(
+                    HttpStatus.OK.value(),
+                    UPDATE_PASSWORD_SUCCESS_MESSAGE
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(USER_UPDATE_FAIL_MESSAGE);
+        }
+    }
+
+    @PostMapping("/user/change-avatar")
+    public ResponseEntity<?> changeAvatar(@ModelAttribute UserRequest userRequest) {
+        try {
+            User user = userService.findById(userRequest.getId());
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(USER_NOT_FOUND_MESSAGE);
+            }
+
+            if (userRequest.getAvatar() != null && !user.getAvatar().isEmpty()) {
+                MultipartFile avatar = userRequest.getAvatar();
+                File uploadDir = new File("public/images");
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdirs();
+                }
+
+                if (user.getAvatar() != null && user.getAvatar() != DEFAULT_AVATAR) {
+                    File oldThumbnail = new File(uploadDir, user.getAvatar());
+                    oldThumbnail.delete();
+                }
+
+                String avatarOriginalFilename = avatar.getOriginalFilename();
+                String avatarFileExtension = avatarOriginalFilename.substring(avatarOriginalFilename.lastIndexOf("."));
+                String avatarUniqFilename = System.currentTimeMillis() + avatarFileExtension;
+                String thumbnailPath = uploadDir.getAbsolutePath() + "/" + avatarUniqFilename;
+                Files.copy(avatar.getInputStream(), Paths.get(thumbnailPath), StandardCopyOption.REPLACE_EXISTING);
+                user.setAvatar(avatarUniqFilename);
+            }
+            user.setModifiedAt(CURRENT_TIME);
+            userService.updateUser(user);
+            return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(
+                    HttpStatus.OK.value(),
+                    USER_UPDATED_MESSAGE,
+                    user.getAvatar()
+            ));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(USER_UPDATE_FAIL_MESSAGE);
+        }
+    }
+
     @PostMapping("/admin/create")
     public ResponseEntity<?> createAdmin(@RequestBody AdminRequest createRequest){
         try {
@@ -162,6 +227,42 @@ public class AuthController {
             String jwt = jwtUtils.generateAdminJwtToken(authentication);
             AdminDetailsImp adminDetails = (AdminDetailsImp) authentication.getPrincipal();
 
+            List<RoleFunction> roleFunctions = roleFunctionService.findFunctionsByRole(adminDetails.getRole().getId());
+            if (roleFunctions == null || roleFunctions.isEmpty()){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(FUNCTION_NOT_FOUND_MESSAGE);
+            }
+
+            FunctionResponse[] functions = roleFunctions.stream().map(
+                    roleFunction -> {
+                        Function function = roleFunction.getFunction();
+                        FunctionResponse resFunc = new FunctionResponse();
+                        resFunc.setId(function.getId());
+                        resFunc.setName(function.getName());
+                        resFunc.setSlug(function.getSlug());
+                        resFunc.setIcon(function.getIcon());
+                        resFunc.setSortOrder(function.getSortOrder());
+
+                        FunctionResponse[] childFunctions = functionService.findShowFunctionsByParentId(function.getId()).stream().map(
+                                childFunction -> {
+                                    Function childFunc = childFunction;
+                                    FunctionResponse resChildFunc = new FunctionResponse();
+                                    resChildFunc.setId(childFunc.getId());
+                                    resChildFunc.setName(childFunc.getName());
+                                    resChildFunc.setSlug(childFunc.getSlug());
+                                    resChildFunc.setIcon(childFunc.getIcon());
+                                    resChildFunc.setSortOrder(childFunc.getSortOrder());
+                                    return resChildFunc;
+                                }
+                        ).toArray(FunctionResponse[]::new);
+
+                        resFunc.setChildFunctions(List.of(childFunctions));
+
+                        return resFunc;
+                    }
+            ).sorted(Comparator.comparing(FunctionResponse::getSortOrder))
+                    .toArray(FunctionResponse[]::new);
+
+
             AdminJwtResponse adminJwtResponse = new AdminJwtResponse();
             adminJwtResponse.setToken(jwt);
             adminJwtResponse.setId(adminDetails.getId());
@@ -170,6 +271,7 @@ public class AuthController {
             adminJwtResponse.setFullName(adminDetails.getFullName());
             adminJwtResponse.setRole(adminDetails.getRole().getName());
             adminJwtResponse.setAvatar(adminDetails.getAvatar());
+            adminJwtResponse.setFunctions(functions);
 
             return ResponseEntity.status(HttpStatus.OK).body(adminJwtResponse);
         }

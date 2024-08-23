@@ -15,7 +15,7 @@ public class RoleResponse {
     private Boolean deleteFlag;
     private String createdAt;
     private String modifiedAt;
-    private Function[] functions;
+    private FunctionResponse[] functions;
     private int responseCode;
     private String message;
 
@@ -37,9 +37,10 @@ public class RoleResponse {
         this.bsColor = bsColor;
     }
 
-    public RoleResponse(Long id, String name, String bsColor, String description, String slug) {
+    public RoleResponse(Long id, String name, FunctionResponse[] functions, String bsColor, String description, String slug ) {
         this.id = id;
         this.name = name;
+        this.functions = functions;
         this.bsColor = bsColor;
         this.description = description;
         this.slug = slug;

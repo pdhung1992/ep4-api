@@ -1,8 +1,13 @@
 package jsb.ep4api.controllers;
 
+import jsb.ep4api.entities.Function;
 import jsb.ep4api.entities.Role;
+import jsb.ep4api.entities.RoleFunction;
+import jsb.ep4api.payloads.responses.FunctionResponse;
 import jsb.ep4api.payloads.responses.RoleResponse;
 import jsb.ep4api.payloads.responses.SpecResponse;
+import jsb.ep4api.services.FunctionService;
+import jsb.ep4api.services.RoleFunctionService;
 import jsb.ep4api.services.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,15 +16,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
-import static jsb.ep4api.constrants.Constants.*;
+import static jsb.ep4api.constants.Constants.*;
 
 @RestController
 @RequestMapping("/api/roles")
 public class RoleController {
     @Autowired
     private RoleService roleService;
+    @Autowired
+    private FunctionService functionService;
+    @Autowired
+    private RoleFunctionService roleFunctionService;
 
     @GetMapping
     public ResponseEntity<?> getRoles(
@@ -48,9 +58,25 @@ public class RoleController {
 
             if (!roleList.isEmpty()){
                 for (Role role : roleList){
+                    List<RoleFunction> roleFunctions = roleFunctionService.findFunctionsByRole(role.getId());
+                    FunctionResponse[] functions = roleFunctions.stream().map(
+                                    function -> {
+                                        Function func = function.getFunction();
+                                        FunctionResponse resFunc = new FunctionResponse();
+                                        resFunc.setId(func.getId());
+                                        resFunc.setName(func.getName());
+                                        resFunc.setDescription(func.getDescription());
+                                        resFunc.setSlug(func.getSlug());
+                                        resFunc.setIcon(func.getIcon());
+                                        resFunc.setSortOrder(func.getSortOrder());
+                                        return resFunc;
+                                    }
+                            ).sorted(Comparator.comparing(FunctionResponse::getSortOrder))
+                            .toArray(FunctionResponse[]::new);
                     RoleResponse roleResponse = new RoleResponse(
                             role.getId(),
                             role.getName(),
+                            functions,
                             role.getBsColor(),
                             role.getDescription(),
                             role.getSlug()
@@ -187,6 +213,53 @@ public class RoleController {
                     HttpStatus.OK.value(),
                     DELETE_ROLE_SUCCESS_MESSAGE
             ));
+        } catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("role-functions-update/{roleId}")
+    public ResponseEntity<?> updateRoleFunctions(@PathVariable Long roleId, @RequestBody Long[] functionIds){
+        try {
+            Role role = roleService.findRoleById(roleId);
+            if (role == null){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ROLE_NOT_FOUND_MESSAGE);
+            }
+
+            for (Long functionId : functionIds){
+                Function function = functionService.findFunctionById(functionId);
+                if (function == null){
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(FUNCTION_NOT_FOUND_MESSAGE);
+                }
+            }
+
+            List<RoleFunction> roleFunctions = roleFunctionService.findFunctionsByRole(roleId);
+            for (RoleFunction roleFunction : roleFunctions){
+                if (!List.of(functionIds).contains(roleFunction.getFunction().getId())){
+                    roleFunctionService.deleteRoleFunction(roleFunction);
+                }
+            }
+
+            for (Long functionId : functionIds){
+                RoleFunction roleFunction = roleFunctions.stream().filter(
+                        rf -> rf.getFunction().getId().equals(functionId)
+                ).findFirst().orElse(null);
+                if (roleFunction == null){
+                    RoleFunction newRoleFunction = new RoleFunction();
+                    newRoleFunction.setRole(role);
+                    newRoleFunction.setFunction(functionService.findFunctionById(functionId));
+                    newRoleFunction.setDeleteFlag(DEFAULT_DELETE_FLAG);
+                    newRoleFunction.setCreatedAt(CURRENT_TIME);
+                    newRoleFunction.setModifiedAt(CURRENT_TIME);
+                    roleFunctionService.createRoleFunction(newRoleFunction);
+                }
+            }
+
+            return ResponseEntity.status(HttpStatus.OK).body(new RoleResponse(
+                    HttpStatus.OK.value(),
+                    UPDATE_ROLE_FUNCTION_SUCCESS_MESSAGE
+            ));
+
         } catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

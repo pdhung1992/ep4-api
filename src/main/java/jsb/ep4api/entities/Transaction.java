@@ -25,6 +25,9 @@ public class Transaction {
     @Column(name = "content")
     private String content;
 
+    @Column(name = "gateway")
+    private String gateway;
+
     @Column(name = "trans_time")
     private LocalDateTime transTime;
 

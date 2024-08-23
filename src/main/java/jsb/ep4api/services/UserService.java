@@ -20,11 +20,21 @@ public class UserService {
         return userRepository.existsByEmail(email);
     }
 
+    //Find a user by id
+    public User findById(Long id){
+        return userRepository.findById(id).orElse(null);
+    }
 
     //Create a new user
     public void createUser(User user){
         userRepository.save(user);
     }
+
+    //Update a user
+    public void updateUser(User user){
+        userRepository.save(user);
+    }
+
 
 
 }

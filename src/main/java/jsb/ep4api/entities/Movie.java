@@ -44,9 +44,6 @@ public class Movie {
     @Column(name = "trailer")
     private String trailer;
 
-    @Column(name = "movie_file")
-    private String movieFile;
-
     @Column(name = "duration")
     private int duration;
 

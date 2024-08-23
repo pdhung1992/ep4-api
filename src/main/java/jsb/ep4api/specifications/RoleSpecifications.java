@@ -2,7 +2,7 @@ package jsb.ep4api.specifications;
 
 import jsb.ep4api.entities.Role;
 import org.springframework.data.jpa.domain.Specification;
-import static jsb.ep4api.constrants.Constants.*;
+import static jsb.ep4api.constants.Constants.*;
 
 public class RoleSpecifications {
 

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static jsb.ep4api.constrants.Constants.*;
+import static jsb.ep4api.constants.Constants.*;
 
 @RestController
 @RequestMapping("/api/accounts")
