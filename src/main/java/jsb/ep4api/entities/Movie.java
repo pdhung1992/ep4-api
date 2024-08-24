@@ -25,6 +25,9 @@ public class Movie {
     @Column(name = "slug")
     private String slug;
 
+    @Column(name = "can_rent")
+    private boolean canRent;
+
     @Column(name = "price")
     private double price;
 
