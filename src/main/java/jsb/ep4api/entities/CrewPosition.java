@@ -7,26 +7,23 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "casts")
+@Table(name = "crew_positions")
 @Getter
 @Setter
-public class Cast {
+public class CrewPosition {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "actor_name")
-    private String actorName;
+    @Column(name = "name")
+    private String name;
 
-    @Column(name = "character_name")
-    private String characterName;
-
-    @Column(name = "is_main")
-    private boolean isMain;
+    @Column(name = "description")
+    private String description;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "movie_id")
-    private Movie movie;
+    @JoinColumn(name = "crew_department_id")
+    private CrewDepartment crewDepartment;
 
     @Column(name = "deleted_flag")
     private Boolean deleteFlag;

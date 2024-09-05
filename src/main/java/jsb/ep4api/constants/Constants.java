@@ -5,9 +5,14 @@ import java.time.LocalDateTime;
 import static java.util.stream.IntStream.rangeClosed;
 
 public class Constants {
+
+    //Roles
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
     public static final String ROLE_USER = "ROLE_USER";
+    public static final int ACCOUNT_MANAGEMENT_FUNCTION = 6;
 
+
+    //Default values
     public static final boolean DEFAULT_DELETE_FLAG = false;
     public static final boolean DEFAULT_VERIFY_FLAG = false;
     public static final boolean DEFAULT_SHOW_FLAG = true;
@@ -28,6 +33,11 @@ public class Constants {
 
     public static final String DEFAULT_AVATAR = "blank_avatar.png";
     public static final String DEFAULT_POSTER = "blank_poster.png";
+
+    //Messages
+    public static final String UNAUTHORIZED_MESSAGE = "Unauthorized!";
+    public static final String FORBIDDEN_MESSAGE = "Forbidden!";
+    public static final String INTERNAL_SERVER_ERROR_MESSAGE = "Internal server error!";
 
     public static final String REGISTER_SUCCESS_MESSAGE = "User registered successfully!";
     public static final String REGISTER_FAIL_MESSAGE = "Register failed! Error: ";

@@ -56,7 +56,6 @@ public class AuthController {
     FunctionService functionService;
 
 
-    //Register a new user
     @PostMapping("/user/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserRequest registerRequest) {
         try {
@@ -103,7 +102,10 @@ public class AuthController {
 
             UserJwtResponse userJwtResponse = new UserJwtResponse();
             userJwtResponse.setToken(jwt);
-            userJwtResponse.setPhone(userDetails.getUsername());
+            userJwtResponse.setPhone(userDetails.getPhone());
+            userJwtResponse.setEmail(userDetails.getEmail());
+            userJwtResponse.setFullName(userDetails.getFullName());
+            userJwtResponse.setAvatar(userDetails.getAvatar());
 
             return ResponseEntity.status(HttpStatus.OK).body(userJwtResponse);
         } catch (Exception e) {
@@ -114,7 +116,8 @@ public class AuthController {
     @PostMapping("/user/change-password")
     public ResponseEntity<?> changePassword(@RequestBody UserRequest changeRequest) {
         try {
-            User user = userService.findById(changeRequest.getId());
+            UserDetailsImp userDetails = (UserDetailsImp) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            User user = userService.findById(userDetails.getId());
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(USER_NOT_FOUND_MESSAGE);
             }
@@ -140,7 +143,8 @@ public class AuthController {
     @PostMapping("/user/change-avatar")
     public ResponseEntity<?> changeAvatar(@ModelAttribute UserRequest userRequest) {
         try {
-            User user = userService.findById(userRequest.getId());
+            UserDetailsImp userDetails = (UserDetailsImp) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            User user = userService.findById(userDetails.getId());
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(USER_NOT_FOUND_MESSAGE);
             }
@@ -174,44 +178,6 @@ public class AuthController {
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(USER_UPDATE_FAIL_MESSAGE);
-        }
-    }
-
-    @PostMapping("/admin/create")
-    public ResponseEntity<?> createAdmin(@RequestBody AdminRequest createRequest){
-        try {
-
-            if (adminService.checkExistUsername(createRequest.getUsername())){
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(USERNAME_EXIST_MESSAGE);
-            }
-
-            if (adminService.checkExistEmail(createRequest.getEmail())){
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(EMAIL_EXIST_MESSAGE);
-            }
-
-            Role role = roleService.findRoleById(createRequest.getRoleId());
-            if (role == null){
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ROLE_NOT_FOUND_MESSAGE);
-            }
-
-            String encodedPassword = encoder.encode(createRequest.getPassword());
-
-            Admin newAdmin = new Admin();
-            newAdmin.setUsername(createRequest.getUsername());
-            newAdmin.setFullName(createRequest.getFullName());
-            newAdmin.setEmail(createRequest.getEmail());
-            newAdmin.setPassword(encodedPassword);
-            newAdmin.setAvatar(DEFAULT_AVATAR);
-            newAdmin.setRole(role);
-            newAdmin.setDeleteFlag(DEFAULT_DELETE_FLAG);
-            newAdmin.setCreatedAt(CURRENT_TIME);
-            newAdmin.setModifiedAt(CURRENT_TIME);
-
-            adminService.createAdmin(newAdmin);
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(CREATE_ADMIN_SUCCESS_MESSAGE);
-        } catch (Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(CREATE_ADMIN_FAIL_MESSAGE + e.getMessage());
         }
     }
 
@@ -283,6 +249,7 @@ public class AuthController {
     @PostMapping("/admin/change-password")
     public ResponseEntity<?> changePassword(@RequestBody AdminRequest changeRequest){
         try {
+            AdminDetailsImp adminDetails = (AdminDetailsImp) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             Admin admin = adminService.getAdminById(changeRequest.getId());
             if (admin == null){
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ADMIN_NOT_FOUND_MESSAGE);
@@ -309,7 +276,8 @@ public class AuthController {
     @PostMapping("/admin/change-avatar")
     public ResponseEntity<?> changeAvatar(@ModelAttribute AdminRequest adminRequest){
         try {
-            Admin admin = adminService.getAdminById(adminRequest.getId());
+            AdminDetailsImp adminDetails = (AdminDetailsImp) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            Admin admin = adminService.getAdminById(adminDetails.getId());
             if (admin == null){
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ADMIN_NOT_FOUND_MESSAGE);
             }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
@@ -34,8 +35,7 @@ public class UserDetailsImp implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<? extends GrantedAuthority> authorities = List.of();
-        return authorities != null ? authorities : Collections.emptyList();
+        return Collections.singletonList(new SimpleGrantedAuthority("Admin"));
     }
 
     @Override

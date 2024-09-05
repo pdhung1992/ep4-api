@@ -1,5 +1,6 @@
 package jsb.ep4api.entities;
 
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -7,10 +8,10 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "crew_roles")
+@Table(name = "crew_departments")
 @Getter
 @Setter
-public class CrewRole {
+public class CrewDepartment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

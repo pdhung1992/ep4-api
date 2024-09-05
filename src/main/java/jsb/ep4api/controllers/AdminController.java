@@ -1,12 +1,14 @@
 package jsb.ep4api.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import jsb.ep4api.config.HasFunctionAccess;
 import jsb.ep4api.entities.Admin;
 import jsb.ep4api.entities.Role;
 import jsb.ep4api.payloads.requests.AdminRequest;
 import jsb.ep4api.payloads.responses.AdminResponse;
 import jsb.ep4api.payloads.responses.RoleResponse;
 import jsb.ep4api.payloads.responses.SpecResponse;
+
 import jsb.ep4api.services.AdminService;
 import jsb.ep4api.services.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,7 @@ import static jsb.ep4api.constants.Constants.*;
 
 @RestController
 @RequestMapping("/api/accounts")
+@HasFunctionAccess(ACCOUNT_MANAGEMENT_FUNCTION)
 public class AdminController {
     @Autowired
     private AdminService adminService;
@@ -31,6 +34,7 @@ public class AdminController {
 
     @Autowired
     private PasswordEncoder encoder;
+
 
     @GetMapping
     public ResponseEntity<?> getAdmins(

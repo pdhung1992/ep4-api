@@ -4,7 +4,6 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jsb.ep4api.securities.service.AdminDetailsImp;
-//import jsb.ep4api.securities.service.CustomUserDetails;
 import jsb.ep4api.securities.service.UserDetailsImp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

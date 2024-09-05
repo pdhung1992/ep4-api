@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -26,12 +27,11 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
+@EnableAspectJAutoProxy
 public class WebSecurityConfig {
 
     @Autowired
     CustomUserDetailsService userDetailsService;
-
-
     @Autowired
     AuthEntryPointJwt unauthorizedHandler;
 
@@ -53,8 +53,6 @@ public class WebSecurityConfig {
         return authProvider;
     }
 
-
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -71,15 +69,20 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/auth/user/register").permitAll()
                         .requestMatchers("api/auth/user/login").permitAll()
+                        .requestMatchers("/api/auth/user/change-password").authenticated()
+                        .requestMatchers("/api/auth/user/change-avatar").authenticated()
 
                         .requestMatchers("/api/auth/admin/create").permitAll()
                         .requestMatchers("/api/auth/admin/login").permitAll()
+                        .requestMatchers("/api/auth/admin/change-password").authenticated()
+                        .requestMatchers("/api/auth/admin/change-avatar").authenticated()
+
+                        .requestMatchers("api/accounts*").authenticated()
 
                         .anyRequest().permitAll()
                 );
 
         http.authenticationProvider(authProvider());
-
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

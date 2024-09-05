@@ -19,8 +19,8 @@ public class CrewMember {
     private String name;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "crew_role_id")
-    private CrewRole crewRole;
+    @JoinColumn(name = "crew_position_id")
+    private CrewPosition crewPosition;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "movie_id")

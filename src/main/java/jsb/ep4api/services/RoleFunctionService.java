@@ -23,6 +23,15 @@ public class RoleFunctionService {
         return roleFunctionRepository.findAll(spec);
     }
 
+    public List<Long> functionIdsByRole(Long roleId) {
+        List<RoleFunction> roleFunctions = findFunctionsByRole(roleId);
+        List<Long> functionIds = new java.util.ArrayList<>();
+        for (RoleFunction roleFunction : roleFunctions) {
+            functionIds.add(roleFunction.getFunction().getId());
+        }
+        return functionIds;
+    }
+
     public void createRoleFunction(RoleFunction roleFunction) {
         roleFunctionRepository.save(roleFunction);
     }

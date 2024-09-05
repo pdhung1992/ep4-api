@@ -6,6 +6,7 @@ import jsb.ep4api.entities.Role;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
@@ -36,8 +37,7 @@ public class AdminDetailsImp implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<? extends GrantedAuthority> authorities = List.of();
-        return authorities != null ? authorities : Collections.emptyList();
+        return Collections.singletonList(new SimpleGrantedAuthority("Admin"));
     }
 
     @Override
