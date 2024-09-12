@@ -2,7 +2,9 @@ package jsb.ep4api.services;
 
 import jsb.ep4api.entities.UserResetPasswordToken;
 import jsb.ep4api.repositories.UserResetPasswordTokenRepository;
+import jsb.ep4api.specifications.UserResetPasswordTokenSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,21 +21,15 @@ public class UserResetPasswordTokenService {
 
     public UserResetPasswordToken getUserResetPasswordTokenByToken(String token) {
 
-        Optional<UserResetPasswordToken> optionalToken = userResetPasswordTokenRepository.findByToken(token);
+        Specification<UserResetPasswordToken> spec = Specification.where(null);
+        spec = spec.and(UserResetPasswordTokenSpecifications.hasNoDeleteFlag());
+        spec = spec.and(UserResetPasswordTokenSpecifications.hasNotUsed());
+        spec = spec.and(UserResetPasswordTokenSpecifications.hasNotExpired());
+        spec = spec.and(UserResetPasswordTokenSpecifications.hasToken(token));
 
-        if (optionalToken.isPresent()) {
-            UserResetPasswordToken tokenEntity = optionalToken.get();
+        Optional<UserResetPasswordToken> optionalToken = userResetPasswordTokenRepository.findOne(spec);
 
-            boolean isNotUsed = !tokenEntity.isUsed();
-            boolean isNotExpired = tokenEntity.getExpiredAt().isAfter(LocalDateTime.now());
-            boolean hasNoDeletedFlag = !tokenEntity.getDeleteFlag();
-
-            if (isNotUsed && isNotExpired && hasNoDeletedFlag) {
-                return tokenEntity;
-            }
-        }
-
-        return null;
+        return optionalToken.orElse(null);
     }
 
     public void saveUserResetPasswordToken(UserResetPasswordToken userResetPasswordToken) {
