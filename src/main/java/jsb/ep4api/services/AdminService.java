@@ -1,7 +1,9 @@
 package jsb.ep4api.services;
 
 import jsb.ep4api.entities.Admin;
+import jsb.ep4api.entities.AdminResetPasswordToken;
 import jsb.ep4api.repositories.AdminRepository;
+import jsb.ep4api.repositories.AdminResetPasswordTokenRepository;
 import jsb.ep4api.specifications.AdminSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,6 +17,8 @@ import org.springframework.stereotype.Service;
 public class AdminService {
     @Autowired
     private AdminRepository adminRepository;
+    @Autowired
+    private AdminResetPasswordTokenRepository adminResetPasswordTokenRepository;
 
     public Page<Admin> getAllAdmins(
             int pageNo,
@@ -51,7 +55,19 @@ public class AdminService {
     };
 
     public Admin getAdminById(Long id){
-        return adminRepository.findById(id).orElse(null);
+        Admin admin = adminRepository.findById(id).orElse(null);
+        if (admin != null && !admin.getDeleteFlag()){
+            return admin;
+        }
+        return null;
+    }
+
+    public Admin getAdminByEmail(String email){
+        Admin admin = adminRepository.findByEmail(email).orElse(null);
+        if (admin != null && !admin.getDeleteFlag()){
+            return admin;
+        }
+        return null;
     }
 
     public Boolean checkExistUsername(String username){

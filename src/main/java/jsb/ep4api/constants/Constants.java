@@ -9,13 +9,15 @@ public class Constants {
     //Roles
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
     public static final String ROLE_USER = "ROLE_USER";
-    public static final int ACCOUNT_MANAGEMENT_FUNCTION = 6;
+    public static final long MOVIE_MANAGEMENT_FUNCTION = 1;
+    public static final long ACCOUNT_MANAGEMENT_FUNCTION = 6;
 
 
     //Default values
     public static final boolean DEFAULT_DELETE_FLAG = false;
     public static final boolean DEFAULT_VERIFY_FLAG = false;
     public static final boolean DEFAULT_SHOW_FLAG = true;
+    public static final boolean DEFAULT_IS_USED = false;
 
     public static final int DEFAULT_PAGE_NUMBER = 0;
     public static final int DEFAULT_PAGE_SIZE = 10;
@@ -34,10 +36,14 @@ public class Constants {
     public static final String DEFAULT_AVATAR = "blank_avatar.png";
     public static final String DEFAULT_POSTER = "blank_poster.png";
 
+    public static final String DEFAULT_ADMIN_URL = "http://localhost:1234";
+    public static final String DEFAULT_USER_URL = "http://localhost:2345";
+
     //Messages
     public static final String UNAUTHORIZED_MESSAGE = "Unauthorized!";
     public static final String FORBIDDEN_MESSAGE = "Forbidden!";
     public static final String INTERNAL_SERVER_ERROR_MESSAGE = "Internal server error!";
+    public static final String ERROR_OCCURRED_MESSAGE = "An error occurred! Try again later!";
 
     public static final String REGISTER_SUCCESS_MESSAGE = "User registered successfully!";
     public static final String REGISTER_FAIL_MESSAGE = "Register failed! Error: ";
@@ -51,10 +57,14 @@ public class Constants {
     public static final String USERNAME_EXIST_MESSAGE = "Username is already taken!";
 
     public static final String ROLE_NOT_FOUND_MESSAGE = "Role not found!";
+    public static final String EMAIL_NOT_FOUND_MESSAGE = "Email not found!";
 
     public static final String LOGIN_SUCCESS_MESSAGE = "User logged in successfully!";
     public static final String LOGIN_FAIL_MESSAGE = "Username or password is incorrect!";
     public static final String LOGOUT_SUCCESS_MESSAGE = "User logged out successfully!";
+
+    public static final String RESET_PASSWORD_SUCCESS_MESSAGE = "Reset password successfully.";
+    public static final String RESET_PASSWORD_TOKEN_ALREADY_SENT_MESSAGE = "Reset password token has already been sent! Please check your email!";
 
     public static final String USER_NOT_FOUND_MESSAGE = "User not found!";
     public static final String USER_UPDATED_MESSAGE = "User updated successfully!";
@@ -81,6 +91,21 @@ public class Constants {
     public static final String DELETE_ROLE_FAIL_MESSAGE = "Delete failed! Error: ";
     public static final String UPDATE_ROLE_FUNCTION_SUCCESS_MESSAGE = "Role function updated successfully!";
     public static final String UPDATE_ROLE_FUNCTION_FAIL_MESSAGE = "Update failed! Error: ";
+
+    //Email
+    public static final String REGISTER_SUCCESS_SUBJECT = "MovieX - Register Success Confirmation";
+    public static final String REGISTER_SUCCESS_BODY = "<strong>Hello %s!</strong>" +
+            "<p>Thank you for registering on our website. We hope you enjoy our services.</p>" +
+            "<p>Best regards,</p>" +
+            "<p>MovieX Team.</p>";
+
+    public static final String RESET_PASSWORD_SUBJECT = "MovieX - Reset Password Confirmation";
+    public static final String RESET_PASSWORD_BODY = "<strong>Hello %s!</strong>" +
+            "<p>You have requested to reset your password. Please click the link below to reset your password.</p>" +
+            "<a href='%s/reset-password?token=%s'>Reset Password</a>" +
+            "<p>If you did not request to reset your password, please ignore this email.</p>" +
+            "<p>Best regards,</p>" +
+            "<p>MovieX Team.</p>";
 
 
     private Constants() {

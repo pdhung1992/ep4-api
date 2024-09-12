@@ -76,6 +76,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/auth/admin/login").permitAll()
                         .requestMatchers("/api/auth/admin/change-password").authenticated()
                         .requestMatchers("/api/auth/admin/change-avatar").authenticated()
+                        .requestMatchers("/api/auth/admin/reset-password").permitAll()
 
                         .requestMatchers("api/accounts*").authenticated()
 

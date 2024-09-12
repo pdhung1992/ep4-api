@@ -25,6 +25,11 @@ public class UserService {
         return userRepository.findById(id).orElse(null);
     }
 
+    //Find a user by email
+    public User findByEmail(String email){
+        return userRepository.findByEmail(email).orElse(null);
+    }
+
     //Create a new user
     public void createUser(User user){
         userRepository.save(user);

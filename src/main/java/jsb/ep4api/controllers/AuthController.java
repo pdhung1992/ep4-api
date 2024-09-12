@@ -3,6 +3,7 @@ package jsb.ep4api.controllers;
 import jakarta.validation.Valid;
 import jsb.ep4api.entities.*;
 import jsb.ep4api.payloads.requests.AdminRequest;
+import jsb.ep4api.payloads.requests.ResetPasswordRequest;
 import jsb.ep4api.payloads.requests.UserRequest;
 import jsb.ep4api.payloads.responses.*;
 import jsb.ep4api.securities.jwt.JwtUtils;
@@ -34,26 +35,26 @@ import static jsb.ep4api.constants.Constants.*;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-
     @Autowired
     AuthenticationManager authenticationManager;
-
     @Autowired
     PasswordEncoder encoder;
-
     @Autowired
     JwtUtils jwtUtils;
-
     @Autowired
     UserService userService;
     @Autowired
     private AdminService adminService;
     @Autowired
-    private RoleService roleService;
+    private EmailService emailService;
     @Autowired
     RoleFunctionService roleFunctionService;
     @Autowired
     FunctionService functionService;
+    @Autowired
+    AdminResetPasswordTokenService adminResetPasswordTokenService;
+    @Autowired
+    UserResetPasswordTokenService userResetPasswordTokenService;
 
 
     @PostMapping("/user/register")
@@ -81,6 +82,13 @@ public class AuthController {
             newUser.setVerifyFlag(DEFAULT_VERIFY_FLAG);
 
             userService.createUser(newUser);
+
+            String emailBody = String.format(REGISTER_SUCCESS_BODY, newUser.getFullName());
+            emailService.sendMail(
+                    newUser.getEmail(),
+                    REGISTER_SUCCESS_SUBJECT,
+                    emailBody
+            );
 
             return ResponseEntity.status(HttpStatus.CREATED).body(REGISTER_SUCCESS_MESSAGE);
 
@@ -110,6 +118,87 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.OK).body(userJwtResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(LOGIN_FAIL_MESSAGE);
+        }
+    }
+
+    @PostMapping("/user/forgot-password")
+    public ResponseEntity<?> forgotUserPassword(@RequestBody ResetPasswordRequest resetRequest) {
+        try {
+            User user = userService.findByEmail(resetRequest.getEmail());
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new UserResponse(
+                        HttpStatus.NOT_FOUND.value(),
+                        ERROR_OCCURRED_MESSAGE
+                ));
+            }
+
+            UserResetPasswordToken resetPasswordToken = userResetPasswordTokenService.getUserResetPasswordTokenByUserId(user.getId());
+            if (resetPasswordToken != null) {
+                if (!resetPasswordToken.isUsed() && resetPasswordToken.getExpiredAt().isAfter(CURRENT_TIME)) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new UserResponse(
+                            HttpStatus.BAD_REQUEST.value(),
+                            RESET_PASSWORD_TOKEN_ALREADY_SENT_MESSAGE
+                    ));
+                }
+
+                userResetPasswordTokenService.deleteUserResetPasswordToken(resetPasswordToken);
+            }
+
+            UserResetPasswordToken newResetPasswordToken = new UserResetPasswordToken(user);
+
+            userResetPasswordTokenService.saveUserResetPasswordToken(newResetPasswordToken);
+
+            String emailBody = String.format(RESET_PASSWORD_BODY, user.getFullName(), DEFAULT_USER_URL, newResetPasswordToken.getToken());
+            emailService.sendMail(
+                    user.getEmail(),
+                    RESET_PASSWORD_SUBJECT,
+                    emailBody
+            );
+
+            return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(
+                    HttpStatus.OK.value(),
+                    RESET_PASSWORD_TOKEN_ALREADY_SENT_MESSAGE
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new UserResponse(
+                    HttpStatus.BAD_REQUEST.value(),
+                    ERROR_OCCURRED_MESSAGE
+            ));
+        }
+    }
+
+    @PostMapping("/user/reset-password")
+    public ResponseEntity<?> resetUserPassword(@RequestBody ResetPasswordRequest resetRequest) {
+        try {
+            UserResetPasswordToken resetPasswordToken = userResetPasswordTokenService.getUserResetPasswordTokenByToken(resetRequest.getToken());
+            if (resetPasswordToken == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new UserResponse(
+                        HttpStatus.NOT_FOUND.value(),
+                        ERROR_OCCURRED_MESSAGE
+                ));
+            }
+
+            User user = resetPasswordToken.getUser();
+            user.setPassword(encoder.encode(resetRequest.getNewPassword()));
+            user.setModifiedAt(CURRENT_TIME);
+
+            userService.updateUser(user);
+
+            resetPasswordToken.setUsed(true);
+            resetPasswordToken.setDeleteFlag(true);
+            resetPasswordToken.setModifiedAt(CURRENT_TIME);
+
+            userResetPasswordTokenService.saveUserResetPasswordToken(resetPasswordToken);
+
+            return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(
+                    HttpStatus.OK.value(),
+                    UPDATE_PASSWORD_SUCCESS_MESSAGE
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new UserResponse(
+                    HttpStatus.BAD_REQUEST.value(),
+                    ERROR_OCCURRED_MESSAGE
+            ));
         }
     }
 
@@ -243,6 +332,87 @@ public class AuthController {
         }
         catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(LOGIN_FAIL_MESSAGE);
+        }
+    }
+
+    @PostMapping("/admin/forgot-password")
+    public ResponseEntity<?> forgotAdminPassword(@RequestBody ResetPasswordRequest resetRequest){
+        try {
+            Admin admin = adminService.getAdminByEmail(resetRequest.getEmail());
+            if (admin == null){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new AdminResponse(
+                        HttpStatus.NOT_FOUND.value(),
+                        ERROR_OCCURRED_MESSAGE
+                ));
+            }
+
+            AdminResetPasswordToken resetPasswordToken = adminResetPasswordTokenService.getAdminResetPasswordTokenByAdminId(admin.getId());
+            if (resetPasswordToken != null){
+                if (!resetPasswordToken.isUsed() && resetPasswordToken.getExpiredAt().isAfter(CURRENT_TIME)){
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AdminResponse(
+                            HttpStatus.BAD_REQUEST.value(),
+                            RESET_PASSWORD_TOKEN_ALREADY_SENT_MESSAGE
+                    ));
+                }
+
+                adminResetPasswordTokenService.deleteAdminResetPasswordToken(resetPasswordToken);
+            }
+
+            AdminResetPasswordToken newResetPasswordToken = new AdminResetPasswordToken(admin);
+
+            adminResetPasswordTokenService.saveAdminResetPasswordToken(newResetPasswordToken);
+
+            String emailBody = String.format(RESET_PASSWORD_BODY, admin.getFullName(), DEFAULT_ADMIN_URL, newResetPasswordToken.getToken());
+            emailService.sendMail(
+                    admin.getEmail(),
+                    RESET_PASSWORD_SUBJECT,
+                    emailBody
+            );
+
+            return ResponseEntity.status(HttpStatus.OK).body(new AdminResponse(
+                    HttpStatus.OK.value(),
+                    RESET_PASSWORD_TOKEN_ALREADY_SENT_MESSAGE
+            ));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AdminResponse(
+                    HttpStatus.BAD_REQUEST.value(),
+                    ERROR_OCCURRED_MESSAGE
+            ));
+        }
+    }
+
+    @PostMapping("/admin/reset-password")
+    public ResponseEntity<?> resetAdminPassword(@RequestBody ResetPasswordRequest resetRequest){
+        try {
+            AdminResetPasswordToken resetPasswordToken = adminResetPasswordTokenService.getAdminResetPasswordTokenByToken(resetRequest.getToken());
+            if (resetPasswordToken == null){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new AdminResponse(
+                        HttpStatus.NOT_FOUND.value(),
+                        ERROR_OCCURRED_MESSAGE
+                ));
+            }
+
+            Admin admin = resetPasswordToken.getAdmin();
+            admin.setPassword(encoder.encode(resetRequest.getNewPassword()));
+            admin.setModifiedAt(CURRENT_TIME);
+
+            adminService.updateAdmin(admin);
+
+            resetPasswordToken.setUsed(true);
+            resetPasswordToken.setDeleteFlag(true);
+            resetPasswordToken.setModifiedAt(CURRENT_TIME);
+
+            adminResetPasswordTokenService.saveAdminResetPasswordToken(resetPasswordToken);
+
+            return ResponseEntity.status(HttpStatus.OK).body(new AdminResponse(
+                    HttpStatus.OK.value(),
+                    UPDATE_PASSWORD_SUCCESS_MESSAGE
+            ));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new AdminResponse(
+                    HttpStatus.BAD_REQUEST.value(),
+                    ERROR_OCCURRED_MESSAGE
+            ));
         }
     }
 

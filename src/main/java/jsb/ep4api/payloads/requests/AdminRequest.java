@@ -14,6 +14,7 @@ public class AdminRequest {
     private String email;
     private String password;
     private String newPassword;
+    private String token;
     private Long roleId;
     MultipartFile avatar;
 
