@@ -21,6 +21,25 @@ public class Studio {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "logo")
+    private String logo;
+
+    @Column(name = "banner")
+    private String banner;
+
+    @Column(name = "website")
+    private String website;
+
+    @Column(name = "address")
+    private String address;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "country_id")
+    private Country country;
+
+    @Column(name = "established_year")
+    private Integer establishedYear;
+
     @Column(name = "slug")
     private String slug;
 

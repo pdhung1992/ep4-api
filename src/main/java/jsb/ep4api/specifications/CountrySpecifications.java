@@ -7,4 +7,12 @@ public class CountrySpecifications {
     public static Specification<Country> hasNoDeleteFlag() {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("deleteFlag"), false);
     }
+
+    public static Specification<Country> hasName(String name) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.like(root.get("name"), "%" + name + "%");
+    }
+
+    public static Specification<Country> hasId(Long id) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("id"), id);
+    }
 }

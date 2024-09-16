@@ -17,8 +17,7 @@ public class AdminResponse {
     private String createdAt;
     private String updatedAt;
     private RoleResponse role;
-    private int responseCode;
-    private String message;
+
 
     public AdminResponse(Long id, String username, String fullName, String email, String avatar, RoleResponse roleResponse) {
         this.id = id;
@@ -29,14 +28,4 @@ public class AdminResponse {
         this.role = roleResponse;
     }
 
-    public AdminResponse(int responseCode, String message) {
-        this.responseCode = responseCode;
-        this.message = message;
-    }
-
-    public AdminResponse(int responseCode, String message, String avatar) {
-        this.responseCode = responseCode;
-        this.message = message;
-        this.avatar = avatar;
-    }
 }

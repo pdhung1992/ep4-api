@@ -334,12 +334,18 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/admin/logout")
+    public ResponseEntity<?> logoutAdmin(){
+        SecurityContextHolder.clearContext();
+        return ResponseEntity.status(HttpStatus.OK).body(LOGOUT_SUCCESS_MESSAGE);
+    }
+
     @PostMapping("/admin/forgot-password")
     public ResponseEntity<?> forgotAdminPassword(@RequestBody ResetPasswordRequest resetRequest){
         try {
             Admin admin = adminService.getAdminByEmail(resetRequest.getEmail());
             if (admin == null){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new AdminResponse(
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RequestResponse(
                         HttpStatus.NOT_FOUND.value(),
                         ERROR_OCCURRED_MESSAGE
                 ));
@@ -348,7 +354,7 @@ public class AuthController {
             AdminResetPasswordToken resetPasswordToken = adminResetPasswordTokenService.getAdminResetPasswordTokenByAdminId(admin.getId());
             if (resetPasswordToken != null){
                 if (!resetPasswordToken.isUsed() && resetPasswordToken.getExpiredAt().isAfter(CURRENT_TIME)){
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AdminResponse(
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RequestResponse(
                             HttpStatus.BAD_REQUEST.value(),
                             RESET_PASSWORD_TOKEN_ALREADY_SENT_MESSAGE
                     ));
@@ -368,12 +374,12 @@ public class AuthController {
                     emailBody
             );
 
-            return ResponseEntity.status(HttpStatus.OK).body(new AdminResponse(
+            return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(
                     HttpStatus.OK.value(),
                     RESET_PASSWORD_TOKEN_ALREADY_SENT_MESSAGE
             ));
         } catch (Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AdminResponse(
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RequestResponse(
                     HttpStatus.BAD_REQUEST.value(),
                     ERROR_OCCURRED_MESSAGE
             ));
@@ -385,7 +391,7 @@ public class AuthController {
         try {
             AdminResetPasswordToken resetPasswordToken = adminResetPasswordTokenService.getAdminResetPasswordTokenByToken(resetRequest.getToken());
             if (resetPasswordToken == null){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new AdminResponse(
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RequestResponse(
                         HttpStatus.NOT_FOUND.value(),
                         ERROR_OCCURRED_MESSAGE
                 ));
@@ -403,12 +409,12 @@ public class AuthController {
 
             adminResetPasswordTokenService.saveAdminResetPasswordToken(resetPasswordToken);
 
-            return ResponseEntity.status(HttpStatus.OK).body(new AdminResponse(
+            return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(
                     HttpStatus.OK.value(),
                     UPDATE_PASSWORD_SUCCESS_MESSAGE
             ));
         } catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new AdminResponse(
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RequestResponse(
                     HttpStatus.BAD_REQUEST.value(),
                     ERROR_OCCURRED_MESSAGE
             ));
@@ -419,7 +425,7 @@ public class AuthController {
     public ResponseEntity<?> changePassword(@RequestBody AdminRequest changeRequest){
         try {
             AdminDetailsImp adminDetails = (AdminDetailsImp) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            Admin admin = adminService.getAdminById(changeRequest.getId());
+            Admin admin = adminService.getAdminById(adminDetails.getId());
             if (admin == null){
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ADMIN_NOT_FOUND_MESSAGE);
             }
@@ -433,7 +439,7 @@ public class AuthController {
 
             adminService.updateAdmin(admin);
 
-            return ResponseEntity.status(HttpStatus.OK).body(new AdminResponse(
+            return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(
                     HttpStatus.OK.value(),
                     UPDATE_PASSWORD_SUCCESS_MESSAGE
             ));
@@ -473,13 +479,30 @@ public class AuthController {
             admin.setModifiedAt(CURRENT_TIME);
 
             adminService.updateAdmin(admin);
-            return ResponseEntity.status(HttpStatus.OK).body(new AdminResponse(
+            return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(
                     HttpStatus.OK.value(),
-                    UPDATE_ADMIN_SUCCESS_MESSAGE,
-                    admin.getAvatar()
+                    UPDATE_ADMIN_SUCCESS_MESSAGE
             ));
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(UPDATE_ADMIN_FAIL_MESSAGE + e.getMessage());
+        }
+    }
+
+    @GetMapping("/admin/get-new-avatar")
+    public ResponseEntity<?> getAvatar(){
+        try {
+            AdminDetailsImp adminDetails = (AdminDetailsImp) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            Admin admin = adminService.getAdminById(adminDetails.getId());
+            if (admin == null){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ADMIN_NOT_FOUND_MESSAGE);
+            }
+
+            return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(
+                    HttpStatus.OK.value(),
+                    admin.getAvatar()
+            ));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ADMIN_NOT_FOUND_MESSAGE);
         }
     }
 }

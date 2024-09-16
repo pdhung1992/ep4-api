@@ -1,7 +1,7 @@
 package jsb.ep4api.services;
 
 import jsb.ep4api.entities.Admin;
-import jsb.ep4api.entities.AdminResetPasswordToken;
+
 import jsb.ep4api.repositories.AdminRepository;
 import jsb.ep4api.repositories.AdminResetPasswordTokenRepository;
 import jsb.ep4api.specifications.AdminSpecifications;

@@ -80,6 +80,11 @@ public class WebSecurityConfig {
 
                         .requestMatchers("api/accounts*").authenticated()
 
+                        .requestMatchers("api/studios").permitAll()
+                        .requestMatchers("api/studios/select").permitAll()
+                        .requestMatchers("api/studios/create").authenticated()
+                        .requestMatchers("api/studios/update").authenticated()
+
                         .anyRequest().permitAll()
                 );
 

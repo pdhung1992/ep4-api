@@ -19,9 +19,25 @@ public class FunctionAccessAspect {
     @Autowired
     private RoleFunctionService roleFunctionService;
 
-    @Around("@within(hasFunctionAccess)")
-    public Object checkFunctionAccess(ProceedingJoinPoint joinPoint, HasFunctionAccess hasFunctionAccess) throws Throwable {
-        Long functionId = hasFunctionAccess.value();
+    @Around("@within(hasFunctionAccessToClass)")
+    public Object checkFunctionAccess(ProceedingJoinPoint joinPoint, HasFunctionAccessToClass hasFunctionAccessToClass) throws Throwable {
+        Long functionId = hasFunctionAccessToClass.value();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof AdminDetailsImp)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+        AdminDetailsImp adminDetails = (AdminDetailsImp) authentication.getPrincipal();
+        List<Long> functionIds = roleFunctionService.functionIdsByRole(adminDetails.getRole().getId());
+        if (functionIds.contains(functionId)) {
+            return joinPoint.proceed();
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You don't have permission to access this function");
+        }
+    }
+
+    @Around("@annotation(hasFunctionAccessToFunction)")
+    public Object checkFunctionAccess(ProceedingJoinPoint joinPoint, HasFunctionAccessToFunction hasFunctionAccessToFunction) throws Throwable {
+        Long functionId = hasFunctionAccessToFunction.value();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !(authentication.getPrincipal() instanceof AdminDetailsImp)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");

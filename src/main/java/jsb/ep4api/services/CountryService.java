@@ -19,4 +19,11 @@ public class CountryService {
         spec = spec.and(CountrySpecifications.hasNoDeleteFlag());
         return countryRepository.findAll(spec);
     }
+
+    public Country getCountryById(Long id){
+        Specification<Country> spec = Specification.where(null);
+        spec = spec.and(CountrySpecifications.hasNoDeleteFlag());
+        spec = spec.and(CountrySpecifications.hasId(id));
+        return countryRepository.findOne(spec).orElse(null);
+    }
 }

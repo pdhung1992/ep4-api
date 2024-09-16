@@ -35,6 +35,8 @@ public class Constants {
 
     public static final String DEFAULT_AVATAR = "blank_avatar.png";
     public static final String DEFAULT_POSTER = "blank_poster.png";
+    public static final String DEFAULT_BANNER = "default_banner.png";
+    public static final String DEFAULT_LOGO = "default_logo.png";
 
     public static final String DEFAULT_ADMIN_URL = "http://localhost:1234";
     public static final String DEFAULT_USER_URL = "http://localhost:2345";
@@ -91,6 +93,22 @@ public class Constants {
     public static final String DELETE_ROLE_FAIL_MESSAGE = "Delete failed! Error: ";
     public static final String UPDATE_ROLE_FUNCTION_SUCCESS_MESSAGE = "Role function updated successfully!";
     public static final String UPDATE_ROLE_FUNCTION_FAIL_MESSAGE = "Update failed! Error: ";
+
+    public static final String CREATE_COUNTRY_SUCCESS_MESSAGE = "Country created successfully!";
+    public static final String CREATE_COUNTRY_FAIL_MESSAGE = "Create failed! Error: ";
+    public static final String UPDATE_COUNTRY_SUCCESS_MESSAGE = "Country updated successfully!";
+    public static final String UPDATE_COUNTRY_FAIL_MESSAGE = "Update failed! Error: ";
+    public static final String DELETE_COUNTRY_SUCCESS_MESSAGE = "Country deleted successfully!";
+    public static final String DELETE_COUNTRY_FAIL_MESSAGE = "Delete failed! Error: ";
+    public static final String COUNTRY_NOT_FOUND_MESSAGE = "Country not found!";
+
+    public static final String CREATE_STUDIO_SUCCESS_MESSAGE = "Studio created successfully!";
+    public static final String CREATE_STUDIO_FAIL_MESSAGE = "Create failed! Error: ";
+    public static final String UPDATE_STUDIO_SUCCESS_MESSAGE = "Studio updated successfully!";
+    public static final String UPDATE_STUDIO_FAIL_MESSAGE = "Update failed! Error: ";
+    public static final String DELETE_STUDIO_SUCCESS_MESSAGE = "Studio deleted successfully!";
+    public static final String DELETE_STUDIO_FAIL_MESSAGE = "Delete failed! Error: ";
+    public static final String STUDIO_NOT_FOUND_MESSAGE = "Studio not found!";
 
     //Email
     public static final String REGISTER_SUCCESS_SUBJECT = "MovieX - Register Success Confirmation";

@@ -1,11 +1,13 @@
 package jsb.ep4api.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import jsb.ep4api.config.HasFunctionAccess;
+import jsb.ep4api.config.HasFunctionAccessToClass;
+import jsb.ep4api.config.HasFunctionAccessToFunction;
 import jsb.ep4api.entities.Admin;
 import jsb.ep4api.entities.Role;
 import jsb.ep4api.payloads.requests.AdminRequest;
 import jsb.ep4api.payloads.responses.AdminResponse;
+import jsb.ep4api.payloads.responses.RequestResponse;
 import jsb.ep4api.payloads.responses.RoleResponse;
 import jsb.ep4api.payloads.responses.SpecResponse;
 
@@ -25,7 +27,7 @@ import static jsb.ep4api.constants.Constants.*;
 
 @RestController
 @RequestMapping("/api/accounts")
-@HasFunctionAccess(ACCOUNT_MANAGEMENT_FUNCTION)
+@HasFunctionAccessToClass(ACCOUNT_MANAGEMENT_FUNCTION)
 public class AdminController {
     @Autowired
     private AdminService adminService;
@@ -145,7 +147,7 @@ public class AdminController {
 
             adminService.createAdmin(newAdmin);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(new AdminResponse(
+            return ResponseEntity.status(HttpStatus.CREATED).body(new RequestResponse(
                     HttpStatus.CREATED.value(),
                     CREATE_ADMIN_SUCCESS_MESSAGE
             ));
@@ -178,7 +180,7 @@ public class AdminController {
 
             adminService.updateAdmin(updateAdmin);
 
-            return ResponseEntity.status(HttpStatus.OK).body(new AdminResponse(
+            return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(
                     HttpStatus.OK.value(),
                     UPDATE_ADMIN_SUCCESS_MESSAGE
             ));
@@ -199,7 +201,7 @@ public class AdminController {
 
             adminService.updateAdmin(deleteAdmin);
 
-            return ResponseEntity.status(HttpStatus.OK).body(new AdminResponse(
+            return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(
                     HttpStatus.OK.value(),
                     DELETE_ADMIN_SUCCESS_MESSAGE
             ));
