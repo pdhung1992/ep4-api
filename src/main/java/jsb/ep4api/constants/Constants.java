@@ -110,6 +110,13 @@ public class Constants {
     public static final String DELETE_STUDIO_FAIL_MESSAGE = "Delete failed! Error: ";
     public static final String STUDIO_NOT_FOUND_MESSAGE = "Studio not found!";
 
+    public static final String CREATE_PACKAGE_SUCCESS_MESSAGE = "Package created successfully!";
+    public static final String CREATE_PACKAGE_FAIL_MESSAGE = "Create failed! Error: ";
+    public static final String UPDATE_PACKAGE_SUCCESS_MESSAGE = "Package updated successfully!";
+    public static final String UPDATE_PACKAGE_FAIL_MESSAGE = "Update failed! Error: ";
+    public static final String DELETE_PACKAGE_SUCCESS_MESSAGE = "Package deleted successfully!";
+    public static final String DELETE_PACKAGE_FAIL_MESSAGE = "Delete failed! Error: ";
+
     //Email
     public static final String REGISTER_SUCCESS_SUBJECT = "MovieX - Register Success Confirmation";
     public static final String REGISTER_SUCCESS_BODY = "<strong>Hello %s!</strong>" +

@@ -18,11 +18,14 @@ public class Package {
     @Column(name = "package_name")
     private String packageName;
 
+    @Column(name = "description")
+    private String description;
+
     @Column(name = "price")
     private Double price;
 
     @Column(name = "expiration_unit")
-    private String expirationUnit;
+    private Integer expirationUnit;
 
     @Column(name = "slug")
     private String slug;

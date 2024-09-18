@@ -85,6 +85,12 @@ public class WebSecurityConfig {
                         .requestMatchers("api/studios/create").authenticated()
                         .requestMatchers("api/studios/update").authenticated()
 
+                        .requestMatchers("api/packages").permitAll()
+                        .requestMatchers("api/packages/select").permitAll()
+                        .requestMatchers("api/packages/create").authenticated()
+                        .requestMatchers("api/packages/update").authenticated()
+                        .requestMatchers("api/packages/delete/*").authenticated()
+
                         .anyRequest().permitAll()
                 );
 
