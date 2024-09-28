@@ -37,9 +37,13 @@ public class Constants {
     public static final String DEFAULT_POSTER = "blank_poster.png";
     public static final String DEFAULT_BANNER = "default_banner.png";
     public static final String DEFAULT_LOGO = "default_logo.png";
+    public static final String DEFAULT_THUMBNAIL = "default_thumbnail.png";
 
     public static final String DEFAULT_ADMIN_URL = "http://localhost:1234";
     public static final String DEFAULT_USER_URL = "http://localhost:2345";
+
+    public static final String DEFAULT_UPLOAD_IMAGE_DIR = "public/images";
+    public static final String DEFAULT_UPLOAD_VIDEO_DIR = "public/media";
 
     //Messages
     public static final String UNAUTHORIZED_MESSAGE = "Unauthorized!";
@@ -116,6 +120,87 @@ public class Constants {
     public static final String UPDATE_PACKAGE_FAIL_MESSAGE = "Update failed! Error: ";
     public static final String DELETE_PACKAGE_SUCCESS_MESSAGE = "Package deleted successfully!";
     public static final String DELETE_PACKAGE_FAIL_MESSAGE = "Delete failed! Error: ";
+    public static final String PACKAGE_NOT_FOUND_MESSAGE = "Package not found!";
+
+    public static final String CREATE_CLASSIFICATION_SUCCESS_MESSAGE = "Classification created successfully!";
+    public static final String CREATE_CLASSIFICATION_FAIL_MESSAGE = "Create failed! Error: ";
+    public static final String UPDATE_CLASSIFICATION_SUCCESS_MESSAGE = "Classification updated successfully!";
+    public static final String UPDATE_CLASSIFICATION_FAIL_MESSAGE = "Update failed! Error: ";
+    public static final String DELETE_CLASSIFICATION_SUCCESS_MESSAGE = "Classification deleted successfully!";
+    public static final String DELETE_CLASSIFICATION_FAIL_MESSAGE = "Delete failed! Error: ";
+    public static final String CLASSIFICATION_NOT_FOUND_MESSAGE = "Classification not found!";
+
+    public static final String CREATE_GENRE_SUCCESS_MESSAGE = "Genre created successfully!";
+    public static final String CREATE_GENRE_FAIL_MESSAGE = "Create failed! Error: ";
+    public static final String UPDATE_GENRE_SUCCESS_MESSAGE = "Genre updated successfully!";
+    public static final String UPDATE_GENRE_FAIL_MESSAGE = "Update failed! Error: ";
+    public static final String DELETE_GENRE_SUCCESS_MESSAGE = "Genre deleted successfully!";
+    public static final String DELETE_GENRE_FAIL_MESSAGE = "Delete failed! Error: ";
+    public static final String GENRE_NOT_FOUND_MESSAGE = "Genre not found!";
+
+    public static final String CREATE_LANGUAGE_SUCCESS_MESSAGE = "Language created successfully!";
+    public static final String CREATE_LANGUAGE_FAIL_MESSAGE = "Create failed! Error: ";
+    public static final String UPDATE_LANGUAGE_SUCCESS_MESSAGE = "Language updated successfully!";
+    public static final String UPDATE_LANGUAGE_FAIL_MESSAGE = "Update failed! Error: ";
+    public static final String DELETE_LANGUAGE_SUCCESS_MESSAGE = "Language deleted successfully!";
+    public static final String DELETE_LANGUAGE_FAIL_MESSAGE = "Delete failed! Error: ";
+    public static final String LANGUAGE_NOT_FOUND_MESSAGE = "Language not found!";
+
+    public static final String CREATE_VIDEO_MODE_SUCCESS_MESSAGE = "Video mode created successfully!";
+    public static final String CREATE_VIDEO_MODE_FAIL_MESSAGE = "Create failed! Error: ";
+    public static final String UPDATE_VIDEO_MODE_SUCCESS_MESSAGE = "Video mode updated successfully!";
+    public static final String UPDATE_VIDEO_MODE_FAIL_MESSAGE = "Update failed! Error: ";
+    public static final String DELETE_VIDEO_MODE_SUCCESS_MESSAGE = "Video mode deleted successfully!";
+    public static final String DELETE_VIDEO_MODE_FAIL_MESSAGE = "Delete failed! Error: ";
+    public static final String VIDEO_MODE_NOT_FOUND_MESSAGE = "Video mode not found!";
+
+    public static final String CREATE_MOVIE_SUCCESS_MESSAGE = "Movie created successfully!";
+    public static final String CREATE_MOVIE_FAIL_MESSAGE = "Create failed! Error: ";
+    public static final String UPDATE_MOVIE_SUCCESS_MESSAGE = "Movie updated successfully!";
+    public static final String UPDATE_MOVIE_FAIL_MESSAGE = "Update failed! Error: ";
+    public static final String DELETE_MOVIE_SUCCESS_MESSAGE = "Movie deleted successfully!";
+    public static final String DELETE_MOVIE_FAIL_MESSAGE = "Delete failed! Error: ";
+    public static final String MOVIE_NOT_FOUND_MESSAGE = "Movie not found!";
+
+    public static final String CREATE_MOVIE_FILE_SUCCESS_MESSAGE = "Movie file created successfully!";
+    public static final String CREATE_MOVIE_FILE_FAIL_MESSAGE = "Create failed! Error: ";
+    public static final String UPDATE_MOVIE_FILE_SUCCESS_MESSAGE = "Movie file updated successfully!";
+    public static final String UPDATE_MOVIE_FILE_FAIL_MESSAGE = "Update failed! Error: ";
+    public static final String DELETE_MOVIE_FILE_SUCCESS_MESSAGE = "Movie file deleted successfully!";
+    public static final String DELETE_MOVIE_FILE_FAIL_MESSAGE = "Delete failed! Error: ";
+    public static final String MOVIE_FILE_NOT_FOUND_MESSAGE = "Movie file not found!";
+
+    public static final String CREATE_CAST_SUCCESS_MESSAGE = "Cast created successfully!";
+    public static final String CREATE_CAST_FAIL_MESSAGE = "Create failed! Error: ";
+    public static final String UPDATE_CAST_SUCCESS_MESSAGE = "Cast updated successfully!";
+    public static final String UPDATE_CAST_FAIL_MESSAGE = "Update failed! Error: ";
+    public static final String DELETE_CAST_SUCCESS_MESSAGE = "Cast deleted successfully!";
+    public static final String DELETE_CAST_FAIL_MESSAGE = "Delete failed! Error: ";
+    public static final String CAST_NOT_FOUND_MESSAGE = "Cast not found!";
+
+    public static final String CREATE_CREW_MEMBER_SUCCESS_MESSAGE = "Crew member created successfully!";
+    public static final String CREATE_CREW_MEMBER_FAIL_MESSAGE = "Create failed! Error: ";
+    public static final String UPDATE_CREW_MEMBER_SUCCESS_MESSAGE = "Crew member updated successfully!";
+    public static final String UPDATE_CREW_MEMBER_FAIL_MESSAGE = "Update failed! Error: ";
+    public static final String DELETE_CREW_MEMBER_SUCCESS_MESSAGE = "Crew member deleted successfully!";
+    public static final String DELETE_CREW_MEMBER_FAIL_MESSAGE = "Delete failed! Error: ";
+    public static final String CREW_MEMBER_NOT_FOUND_MESSAGE = "Crew member not found!";
+
+    public static final String CREATE_CREW_POSITION_SUCCESS_MESSAGE = "Crew position created successfully!";
+    public static final String CREATE_CREW_POSITION_FAIL_MESSAGE = "Create failed! Error: ";
+    public static final String UPDATE_CREW_POSITION_SUCCESS_MESSAGE = "Crew position updated successfully!";
+    public static final String UPDATE_CREW_POSITION_FAIL_MESSAGE = "Update failed! Error: ";
+    public static final String DELETE_CREW_POSITION_SUCCESS_MESSAGE = "Crew position deleted successfully!";
+    public static final String DELETE_CREW_POSITION_FAIL_MESSAGE = "Delete failed! Error: ";
+    public static final String CREW_POSITION_NOT_FOUND_MESSAGE = "Crew position not found!";
+
+    public static final String CREATE_MOVIE_SUCCESS = "Movie created successfully!";
+    public static final String CREATE_MOVIE_FAIL = "Create failed! Error: ";
+    public static final String UPDATE_MOVIE_SUCCESS = "Movie updated successfully!";
+    public static final String UPDATE_MOVIE_FAIL = "Update failed! Error: ";
+    public static final String DELETE_MOVIE_SUCCESS = "Movie deleted successfully!";
+    public static final String DELETE_MOVIE_FAIL = "Delete failed! Error: ";
+    public static final String MOVIE_NOT_FOUND = "Movie not found!";
 
     //Email
     public static final String REGISTER_SUCCESS_SUBJECT = "MovieX - Register Success Confirmation";

@@ -239,7 +239,7 @@ public class AuthController {
 
             if (userRequest.getAvatar() != null && !user.getAvatar().isEmpty()) {
                 MultipartFile avatar = userRequest.getAvatar();
-                File uploadDir = new File("public/images");
+                File uploadDir = new File(DEFAULT_UPLOAD_IMAGE_DIR);
                 if (!uploadDir.exists()) {
                     uploadDir.mkdirs();
                 }
@@ -459,7 +459,7 @@ public class AuthController {
 
             if (adminRequest.getAvatar() != null && !admin.getAvatar().isEmpty()){
                 MultipartFile avatar = adminRequest.getAvatar();
-                File uploadDir = new File("public/images");
+                File uploadDir = new File(DEFAULT_UPLOAD_IMAGE_DIR);
                 if (!uploadDir.exists()){
                     uploadDir.mkdirs();
                 }

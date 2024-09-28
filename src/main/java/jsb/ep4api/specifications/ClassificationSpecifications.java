@@ -4,6 +4,10 @@ import jsb.ep4api.entities.Classification;
 import org.springframework.data.jpa.domain.Specification;
 
 public class ClassificationSpecifications {
+    public static Specification<Classification> hasId(Long id) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("id"), id);
+    }
+
     public static Specification<Classification> hasName(String name) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("name"), name);
     }

@@ -4,6 +4,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+# Ignore all files in the public folder
+public/*
+
 ### STS ###
 .apt_generated
 .classpath

@@ -4,6 +4,10 @@ import jsb.ep4api.entities.Studio;
 import org.springframework.data.jpa.domain.Specification;
 
 public class StudioSpecifications {
+    public static Specification<Studio> hasId(Long id) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("id"), id);
+    }
+
     public static Specification<Studio> hasNameInclude(String name) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.like(root.get("name"), "%" + name + "%");
     }

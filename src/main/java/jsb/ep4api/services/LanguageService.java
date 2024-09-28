@@ -19,4 +19,11 @@ public class LanguageService {
         spec = spec.and(LanguageSpecifications.hasNoDeleteFlag());
         return languageRepository.findAll(spec);
     }
+
+    public Language getLanguageById(Long id) {
+        Specification<Language> spec = Specification.where(null);
+        spec = spec.and(LanguageSpecifications.hasNoDeleteFlag());
+        spec = spec.and(LanguageSpecifications.hasId(id));
+        return languageRepository.findOne(spec).orElse(null);
+    }
 }

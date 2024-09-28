@@ -62,12 +62,12 @@ public class Movie {
     private Studio studio;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "classification_id")
-    private Classification classification;
-
-    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "video_mode_id")
     private VideoMode videoMode;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "classification_id")
+    private Classification classification;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "created_by_admin_id")

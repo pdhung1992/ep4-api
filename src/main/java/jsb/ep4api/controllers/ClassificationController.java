@@ -88,4 +88,27 @@ public class ClassificationController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/select")
+    public ResponseEntity<?> getAllClassificationsSelect() {
+        try {
+            List<Classification> classifications = classificationService.getAllClassificationsSelect();
+            List<ClassificationResponse> classificationResponses = new ArrayList<>();
+
+            if (!classifications.isEmpty()) {
+                for (Classification c : classifications) {
+                    ClassificationResponse classificationResponse = new ClassificationResponse();
+                    classificationResponse.setId(c.getId());
+                    classificationResponse.setName(c.getName());
+                    classificationResponse.setCode(c.getCode());
+                    classificationResponses.add(classificationResponse);
+                }
+            }
+
+            return ResponseEntity.ok(classificationResponses);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

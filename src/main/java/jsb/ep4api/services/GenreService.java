@@ -19,4 +19,11 @@ public class GenreService {
         spec = spec.and(GenreSpecifications.hasNoDeleteFlag());
         return genreRepository.findAll(spec);
     }
+
+    public Genre getGenreById(Long id) {
+        Specification<Genre> spec = Specification.where(null);
+        spec = spec.and(GenreSpecifications.hasNoDeleteFlag());
+        spec = spec.and(GenreSpecifications.hasId(id));
+        return genreRepository.findOne(spec).orElse(null);
+    }
 }

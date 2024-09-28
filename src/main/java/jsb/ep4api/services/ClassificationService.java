@@ -11,6 +11,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class ClassificationService {
     @Autowired
@@ -35,5 +37,18 @@ public class ClassificationService {
         spec = spec.and(ClassificationSpecifications.hasNoDeleteFlag());
 
         return classificationRepository.findAll(spec, pageable);
+    }
+
+    public List<Classification> getAllClassificationsSelect() {
+        Specification<Classification> spec = Specification.where(null);
+        spec = spec.and(ClassificationSpecifications.hasNoDeleteFlag());
+        return classificationRepository.findAll(spec);
+    }
+
+    public Classification getClassificationById(Long id) {
+        Specification<Classification> spec = Specification.where(null);
+        spec = spec.and(ClassificationSpecifications.hasId(id));
+        spec = spec.and(ClassificationSpecifications.hasNoDeleteFlag());
+        return classificationRepository.findOne(spec).orElse(null);
     }
 }

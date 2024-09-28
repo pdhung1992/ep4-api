@@ -20,4 +20,11 @@ public class CrewPositionService {
         return crewPositionRepository.findAll(spec);
     }
 
+    public CrewPosition getCrewPositionById(Long id) {
+        Specification<CrewPosition> spec = Specification.where(null);
+        spec = spec.and(CrewPositionSpecifications.hasNoDeleteFlag());
+        spec = spec.and(CrewPositionSpecifications.hasId(id));
+        return crewPositionRepository.findOne(spec).orElse(null);
+    }
+
 }

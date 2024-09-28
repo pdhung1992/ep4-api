@@ -50,7 +50,10 @@ public class StudioService {
     }
 
     public Studio getStudioById(Long id){
-        return studioRepository.findById(id).orElse(null);
+        Specification<Studio> spec = Specification.where(null);
+        spec = spec.and(StudioSpecifications.hasId(id));
+        spec = spec.and(StudioSpecifications.hasNoDeletedFlag());
+        return studioRepository.findOne(spec).orElse(null);
     }
 
     public void createStudio(Studio studio){

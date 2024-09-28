@@ -19,16 +19,15 @@ public class MovieFile {
     @Column(name = "file_name")
     private String fileName;
 
+    @Column(name = "thumbnail")
+    private String thumbnail;
+
     @Column(name = "title")
     private String title;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "movie_id")
     private Movie movie;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "video_mode_id")
-    private VideoMode videoMode;
 
     @Column(name = "deleted_flag")
     private Boolean deleteFlag;

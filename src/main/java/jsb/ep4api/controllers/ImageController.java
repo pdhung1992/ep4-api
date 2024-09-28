@@ -15,10 +15,12 @@ import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static jsb.ep4api.constants.Constants.DEFAULT_UPLOAD_IMAGE_DIR;
+
 @RestController
 @RequestMapping("/api/images")
 public class ImageController {
-    private final Path imageUploadPath = Paths.get("public/images");
+    private final Path imageUploadPath = Paths.get(DEFAULT_UPLOAD_IMAGE_DIR);
 
     @GetMapping("/{filename:.+}")
     public ResponseEntity<Resource> getImage(@PathVariable String filename) throws IOException, MalformedURLException {

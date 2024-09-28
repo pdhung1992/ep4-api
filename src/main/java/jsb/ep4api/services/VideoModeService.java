@@ -19,4 +19,11 @@ public class VideoModeService {
         spec = spec.and(VideoModeSpecifications.hasNoDeleteFlag());
         return videoModeRepository.findAll(spec);
     }
+
+    public VideoMode getVideoModeById(Long id) {
+        Specification<VideoMode> spec = Specification.where(null);
+        spec = spec.and(VideoModeSpecifications.hasNoDeleteFlag());
+        spec = spec.and(VideoModeSpecifications.hasId(id));
+        return videoModeRepository.findOne(spec).orElse(null);
+    }
 }

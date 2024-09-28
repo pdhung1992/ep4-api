@@ -139,7 +139,7 @@ public class StudioController {
 
             if (createStudioRequest.getLogo() != null) {
                 MultipartFile logo = createStudioRequest.getLogo();
-                File uploadDir = new File("public/images");
+                File uploadDir = new File(DEFAULT_UPLOAD_IMAGE_DIR);
                 if (!uploadDir.exists()) {
                     uploadDir.mkdirs();
                 }
@@ -156,7 +156,7 @@ public class StudioController {
 
             if (createStudioRequest.getBanner() != null) {
                 MultipartFile banner = createStudioRequest.getBanner();
-                File uploadDir = new File("public/images");
+                File uploadDir = new File(DEFAULT_UPLOAD_IMAGE_DIR);
                 if (!uploadDir.exists()) {
                     uploadDir.mkdirs();
                 }
@@ -209,7 +209,7 @@ public class StudioController {
 
             if (updateStudioRequest.getLogo() != null && !updateStudioRequest.getLogo().isEmpty()) {
                 MultipartFile logo = updateStudioRequest.getLogo();
-                File uploadDir = new File("public/images");
+                File uploadDir = new File(DEFAULT_UPLOAD_IMAGE_DIR);
                 if (!uploadDir.exists()) {
                     uploadDir.mkdirs();
                 }
@@ -229,7 +229,7 @@ public class StudioController {
 
             if (updateStudioRequest.getBanner() != null && !updateStudioRequest.getBanner().isEmpty()) {
                 MultipartFile banner = updateStudioRequest.getBanner();
-                File uploadDir = new File("public/images");
+                File uploadDir = new File(DEFAULT_UPLOAD_IMAGE_DIR);
                 if (!uploadDir.exists()) {
                     uploadDir.mkdirs();
                 }
@@ -275,7 +275,7 @@ public class StudioController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(STUDIO_NOT_FOUND_MESSAGE);
             }
 
-            File uploadDir = new File("public/images");
+            File uploadDir = new File(DEFAULT_UPLOAD_IMAGE_DIR);
             if (!uploadDir.exists()) {
                 uploadDir.mkdirs();
             }
