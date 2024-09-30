@@ -94,6 +94,9 @@ public class WebSecurityConfig {
                         .requestMatchers("api/packages/update").authenticated()
                         .requestMatchers("api/packages/delete/*").authenticated()
 
+                        .requestMatchers("api/movies/*").authenticated()
+                        .requestMatchers("api/movies/client/*").permitAll()
+
                         .anyRequest().permitAll()
                 );
 

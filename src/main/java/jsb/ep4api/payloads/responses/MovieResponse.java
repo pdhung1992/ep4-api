@@ -17,7 +17,7 @@ public class MovieResponse {
     private Long packageId;
     private String packageName;
     private Long views;
-    private String storyline;
+    private String storyLine;
     private String poster;
     private String trailer;
     private int duration;
@@ -34,9 +34,9 @@ public class MovieResponse {
     private boolean isShow;
     private List<MovieFileResponse> files;
     private List<CastResponse> casts;
-    private List<GenreResponse> genres;
+    private List<String> genres;
     private List<CrewMemberResponse> crewMembers;
-    private List<LanguageResponse> languages;
+    private List<String> languages;
 
     public MovieResponse() {
     }

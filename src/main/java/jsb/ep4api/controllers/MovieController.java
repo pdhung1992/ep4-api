@@ -3,11 +3,13 @@ package jsb.ep4api.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jsb.ep4api.config.HasFunctionAccessToFunction;
 import jsb.ep4api.entities.*;
 import jsb.ep4api.entities.Package;
 import jsb.ep4api.payloads.requests.CastRequest;
 import jsb.ep4api.payloads.requests.CrewMemberRequest;
 import jsb.ep4api.payloads.requests.MovieFileRequest;
+import jsb.ep4api.payloads.responses.GenreResponse;
 import jsb.ep4api.payloads.responses.MovieResponse;
 import jsb.ep4api.payloads.responses.RequestResponse;
 import jsb.ep4api.payloads.responses.SpecResponse;
@@ -65,6 +67,7 @@ public class MovieController {
     CrewPositionService crewPositionService;
 
     @GetMapping("/admin")
+    @HasFunctionAccessToFunction(MOVIE_MANAGEMENT_FUNCTION)
     public ResponseEntity<?> getAllMovies(
             @RequestParam(required = false) Integer pageNo,
             @RequestParam(required = false) Integer pageSize,
@@ -101,6 +104,7 @@ public class MovieController {
                 movieResponse.setShow(movie.isShow());
                 movieResponse.setShowAtHome(movie.isShowAtHome());
                 movieResponse.setPoster(movie.getPoster());
+                movieResponse.setSlug(movie.getSlug());
 
                 movieResponses.add(movieResponse);
             }
@@ -132,8 +136,56 @@ public class MovieController {
         }
     }
 
-    @GetMapping("/client")
-    public ResponseEntity<?> getDisplayMovies(
+    @GetMapping("admin/details/{id}")
+    @HasFunctionAccessToFunction(MOVIE_MANAGEMENT_FUNCTION)
+    public ResponseEntity<?> getMovieDetailsForAdmin(@PathVariable Long id){
+        try {
+            Movie movie = movieService.getMovieById(id);
+            if (movie == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MOVIE_NOT_FOUND_MESSAGE);
+            }
+
+            MovieResponse movieResponse = new MovieResponse();
+            movieResponse.setId(movie.getId());
+            movieResponse.setTitle(movie.getTitle());
+            movieResponse.setOriginalTitle(movie.getOriginalTitle());
+            movieResponse.setCanRent(movie.isCanRent());
+            movieResponse.setPrice(movie.getPrice());
+            movieResponse.setPackageName(movie.getAPackage().getPackageName());
+            movieResponse.setViews(movie.getViews());
+            movieResponse.setStoryLine(movie.getStoryline());
+            movieResponse.setPoster(movie.getPoster());
+            movieResponse.setTrailer(movie.getTrailer());
+            movieResponse.setDuration(movie.getDuration());
+            movieResponse.setReleaseYear(movie.getReleaseYear());
+            movieResponse.setCountry(movie.getCountry().getName());
+            movieResponse.setStudio(movie.getStudio().getName());
+            movieResponse.setVideoMode(movie.getVideoMode().getName());
+            movieResponse.setClassification("[" + movie.getClassification().getCode() + "] " + movie.getClassification().getName());
+            movieResponse.setShowAtHome(movie.isShowAtHome());
+            movieResponse.setShow(movie.isShow());
+
+            List<MovieGenre> movieGenres = movieGenreService.getMovieGenresByMovieId(id);
+            List<String> genres = new ArrayList<>();
+            for (MovieGenre movieGenre : movieGenres) {
+                genres.add(movieGenre.getGenre().getName());
+            }
+            movieResponse.setGenres(genres);
+
+            List<MovieLanguage> movieLanguages = movieLanguageService.getMovieLanguagesByMovieId(id);
+            List<String> languageResponses = new ArrayList<>();
+            for (MovieLanguage movieLanguage : movieLanguages) {
+                languageResponses.add(movieLanguage.getLanguage().getNativeName());
+            }
+            movieResponse.setLanguages(languageResponses);
+            return ResponseEntity.ok(movieResponse);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/client/show")
+    public ResponseEntity<?> getShowMovies(
             @RequestParam(required = false) Integer pageNo,
             @RequestParam(required = false) Integer pageSize,
             @RequestParam(required = false) String sortField,
@@ -164,11 +216,17 @@ public class MovieController {
                 movieResponse.setId(movie.getId());
                 movieResponse.setTitle(movie.getTitle());
                 movieResponse.setOriginalTitle(movie.getOriginalTitle());
+                movieResponse.setPrice(movie.getPrice());
                 movieResponse.setDuration(movie.getDuration());
                 movieResponse.setReleaseYear(movie.getReleaseYear());
-                movieResponse.setShow(movie.isShow());
-                movieResponse.setShowAtHome(movie.isShowAtHome());
                 movieResponse.setPoster(movie.getPoster());
+                movieResponse.setPackageId(movie.getAPackage().getId());
+                movieResponse.setCountryId(movie.getCountry().getId());
+                movieResponse.setStudioId(movie.getStudio().getId());
+                movieResponse.setVideoModeId(movie.getVideoMode().getId());
+                movieResponse.setClassificationId(movie.getClassification().getId());
+
+
 
                 movieResponses.add(movieResponse);
             }
@@ -200,7 +258,41 @@ public class MovieController {
         }
     }
 
+    @GetMapping("/client/showAtHome")
+    public ResponseEntity<?> getShowAtHomeMovies() throws JsonProcessingException {
+        try {
+            List<Movie> movies = movieService.getShowAtHomeMovies();
+            List<MovieResponse> movieResponses = new ArrayList<>();
+
+            for (Movie movie : movies) {
+                MovieResponse movieResponse = new MovieResponse();
+                movieResponse.setId(movie.getId());
+                movieResponse.setTitle(movie.getTitle());
+                movieResponse.setOriginalTitle(movie.getOriginalTitle());
+                movieResponse.setDuration(movie.getDuration());
+                movieResponse.setReleaseYear(movie.getReleaseYear());
+                movieResponse.setPoster(movie.getPoster());
+
+                movieResponses.add(movieResponse);
+            }
+
+            return ResponseEntity.ok(movieResponses);
+        }catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/client/details/{id}")
+    public ResponseEntity<?> getMovieDetailsForClient(@PathVariable Long id){
+        try {
+            return null;
+        }catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @PostMapping( "/create")
+    @HasFunctionAccessToFunction(MOVIE_MANAGEMENT_FUNCTION)
     public ResponseEntity<?> createMovie(
             @RequestParam("title") String title,
             @RequestParam("originalTitle") String originalTitle,
@@ -446,6 +538,7 @@ public class MovieController {
     }
 
     @PutMapping("/update")
+    @HasFunctionAccessToFunction(MOVIE_MANAGEMENT_FUNCTION)
     public ResponseEntity<?> updateMovie(
             @RequestParam("id") Long id,
             @RequestParam("title") String title,
@@ -670,7 +763,58 @@ public class MovieController {
         }
     }
 
+    @PutMapping("/update/show")
+    @HasFunctionAccessToFunction(MOVIE_MANAGEMENT_FUNCTION)
+    public ResponseEntity<?> updateShowMovie(
+            @RequestParam Long id,
+            @RequestParam Boolean isShow
+    ) {
+        try {
+            Movie updateMovie = movieService.getMovieById(id);
+            if (updateMovie == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MOVIE_NOT_FOUND_MESSAGE);
+            }
+            updateMovie.setShow(isShow);
+            updateMovie.setModifiedAt(CURRENT_TIME);
+
+            movieService.updateMovie(updateMovie);
+
+            return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(
+                    HttpStatus.OK.value(),
+                    UPDATE_MOVIE_SUCCESS
+            ));
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/update/showAtHome")
+    @HasFunctionAccessToFunction(MOVIE_MANAGEMENT_FUNCTION)
+    public ResponseEntity<?> updateShowAtHomeMovie(
+            @RequestParam Long id,
+            @RequestParam Boolean isShowAtHome
+    ) {
+        try {
+            Movie updateMovie = movieService.getMovieById(id);
+            if (updateMovie == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MOVIE_NOT_FOUND_MESSAGE);
+            }
+            updateMovie.setShowAtHome(isShowAtHome);
+            updateMovie.setModifiedAt(CURRENT_TIME);
+
+            movieService.updateMovie(updateMovie);
+
+            return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(
+                    HttpStatus.OK.value(),
+                    UPDATE_MOVIE_SUCCESS
+            ));
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @DeleteMapping("/delete/{id}")
+    @HasFunctionAccessToFunction(MOVIE_MANAGEMENT_FUNCTION)
     public ResponseEntity<?> deleteMovie(@PathVariable Long id) {
         try {
             Movie deleteMovie = movieService.getMovieById(id);

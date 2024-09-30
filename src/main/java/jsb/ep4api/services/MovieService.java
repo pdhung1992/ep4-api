@@ -11,6 +11,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class MovieService {
     @Autowired
@@ -65,6 +67,13 @@ public class MovieService {
         spec = spec.and(MovieSpecifications.hasShowFlag(true));
 
         return movieRepository.findAll(spec, pageable);
+    }
+
+    public List<Movie> getShowAtHomeMovies() {
+        Specification<Movie> spec = Specification.where(null);
+        spec = spec.and(MovieSpecifications.hasNoDeletedFlag());
+        spec = spec.and(MovieSpecifications.hasShowAtHomeFlag(true));
+        return movieRepository.findAll(spec);
     }
 
     public Movie getMovieById(Long id) {

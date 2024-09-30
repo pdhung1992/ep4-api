@@ -16,7 +16,7 @@ public class MovieGenreSpecifications {
     }
 
     public static Specification<MovieGenre> hasNoDeletedFlag() {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("isDeleted"), false);
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("deleteFlag"), false);
     }
 
 }

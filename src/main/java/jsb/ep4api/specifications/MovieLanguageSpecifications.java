@@ -20,6 +20,6 @@ public class MovieLanguageSpecifications {
     }
 
     public static Specification<MovieLanguage> hasNoDeletedFlag() {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.isFalse(root.get("deleted"));
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("deleteFlag"), false);
     }
 }

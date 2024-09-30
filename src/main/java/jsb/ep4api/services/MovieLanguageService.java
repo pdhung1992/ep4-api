@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class MovieLanguageService {
     @Autowired
@@ -18,6 +20,14 @@ public class MovieLanguageService {
         spec = spec.and(MovieLanguageSpecifications.hasNoDeletedFlag());
 
         return movieLanguageRepository.findOne(spec).orElse(null);
+    }
+
+    public List<MovieLanguage> getMovieLanguagesByMovieId(Long movieId) {
+        Specification<MovieLanguage> spec = Specification.where(null);
+        spec = spec.and(MovieLanguageSpecifications.hasMovieId(movieId));
+        spec = spec.and(MovieLanguageSpecifications.hasNoDeletedFlag());
+
+        return movieLanguageRepository.findAll(spec);
     }
 
     public MovieLanguage getMovieLanguageByMovieIdAndLanguageId(Long movieId, Long languageId) {
