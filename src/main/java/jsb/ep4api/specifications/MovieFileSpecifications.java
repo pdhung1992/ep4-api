@@ -12,6 +12,10 @@ public class MovieFileSpecifications {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("movie").get("id"), movieId);
     }
 
+    public static Specification<MovieFile> hasFilename(String fileName) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("fileName"), fileName);
+    }
+
     public static Specification<MovieFile> hasNoDeleteFlag() {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("deleteFlag"), false);
     }

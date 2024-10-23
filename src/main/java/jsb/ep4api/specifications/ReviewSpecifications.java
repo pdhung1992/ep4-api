@@ -1,10 +1,7 @@
 package jsb.ep4api.specifications;
 
 import jsb.ep4api.entities.Review;
-import jsb.ep4api.entities.Studio;
 import org.springframework.data.jpa.domain.Specification;
-
-import static jsb.ep4api.constants.Constants.DEFAULT_DELETE_FLAG;
 
 public class ReviewSpecifications {
     public static Specification<Review> hasId(Long id) {

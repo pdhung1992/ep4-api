@@ -32,6 +32,9 @@ public class Constants {
 
     public static final String DEFAULT_EXPIRED_TIME = "30 Days";
     public static final LocalDateTime CURRENT_TIME = LocalDateTime.now();
+    public static final LocalDateTime EXPIRED_30_DAYS = CURRENT_TIME.plusDays(30);
+    public static final LocalDateTime EXPIRED_90_DAYS = CURRENT_TIME.plusDays(90);
+    public static final LocalDateTime EXPIRED_180_DAYS = CURRENT_TIME.plusDays(180);
 
     public static final String DEFAULT_AVATAR = "blank_avatar.png";
     public static final String DEFAULT_POSTER = "blank_poster.png";
@@ -169,6 +172,7 @@ public class Constants {
     public static final String DELETE_MOVIE_SUCCESS_MESSAGE = "Movie deleted successfully!";
     public static final String DELETE_MOVIE_FAIL_MESSAGE = "Delete failed! Error: ";
     public static final String MOVIE_NOT_FOUND_MESSAGE = "Movie not found!";
+    public static final String CAN_NOT_WATCH_MESSAGE = "You can not watch this movie!";
 
     public static final String CREATE_MOVIE_FILE_SUCCESS_MESSAGE = "Movie file created successfully!";
     public static final String CREATE_MOVIE_FILE_FAIL_MESSAGE = "Create failed! Error: ";

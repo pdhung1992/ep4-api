@@ -22,6 +22,14 @@ public class MovieFileService {
         return movieFileRepository.findAll(spec);
     }
 
+    public MovieFile getMovieFileByFilename(String filename) {
+        Specification<MovieFile> spec = Specification.where(null);
+        spec = spec.and(MovieFileSpecifications.hasFilename(filename));
+        spec = spec.and(MovieFileSpecifications.hasNoDeleteFlag());
+
+        return movieFileRepository.findOne(spec).orElse(null);
+    }
+
     public void createMovieFile(MovieFile movieFile) {
         movieFileRepository.save(movieFile);
     }
