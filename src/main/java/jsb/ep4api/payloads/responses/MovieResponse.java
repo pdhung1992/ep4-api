@@ -30,10 +30,12 @@ public class MovieResponse {
     private String videoMode;
     private Long classificationId;
     private String classification;
+    private Long categoryId;
+    private String category;
     private boolean isShowAtHome;
     private boolean isShow;
     private List<MovieFileResponse> files;
-    private List<CastResponse> casts;
+    private List<CastResponse> mainCasts;
     private List<String> genres;
     private List<CrewMemberResponse> crewMembers;
     private List<String> languages;

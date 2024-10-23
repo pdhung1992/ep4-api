@@ -31,6 +31,7 @@ public class MovieSpecifications {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("country").get("id"), countryId);
     }
 
+
     public static Specification<Movie> hasPackageId(Long packageId) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("aPackage").get("id"), packageId);
     }
@@ -53,6 +54,10 @@ public class MovieSpecifications {
 
     public static Specification<Movie> belongsToClassification(Long classificationId) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("classification").get("id"), classificationId);
+    }
+
+    public static Specification<Movie> belongsToCategory(Long categoryId) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.join("categories").get("id"), categoryId);
     }
 
     public static Specification<Movie> hasShowFlag(boolean isShow) {

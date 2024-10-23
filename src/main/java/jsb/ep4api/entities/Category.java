@@ -7,24 +7,22 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "review_reactions")
+@Table(name = "categories")
 @Getter
 @Setter
-public class ReviewReaction {
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "review_id")
-    private Review review;
+    @Column(name = "name")
+    private String name;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @Column(name = "description")
+    private String description;
 
-    @Column(name = "reaction_type")
-    private boolean reactionType;
+    @Column(name = "slug")
+    private String slug;
 
     @Column(name = "deleted_flag")
     private Boolean deleteFlag;
@@ -34,4 +32,8 @@ public class ReviewReaction {
 
     @Column(name = "modified_at")
     private LocalDateTime modifiedAt;
+
+    public Category(){
+
+    }
 }

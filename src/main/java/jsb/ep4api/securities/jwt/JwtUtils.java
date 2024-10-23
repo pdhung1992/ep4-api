@@ -34,7 +34,7 @@ public class JwtUtils {
     public String generateUserJwtToken(Authentication authentication) {
         UserDetailsImp userPrincipal = (UserDetailsImp) authentication.getPrincipal();
 
-        Claims claims = Jwts.claims().setSubject(userPrincipal.getUsername());
+        Claims claims = Jwts.claims().setSubject(userPrincipal.getPhone());
         claims.put("authorities", userPrincipal.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
         claims.put("phoneOrEmail", userPrincipal.getPhoneOrEmail());
 

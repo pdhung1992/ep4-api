@@ -3,16 +3,14 @@ package jsb.ep4api.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jsb.ep4api.config.HasFunctionAccessToClass;
 import jsb.ep4api.config.HasFunctionAccessToFunction;
 import jsb.ep4api.entities.*;
 import jsb.ep4api.entities.Package;
 import jsb.ep4api.payloads.requests.CastRequest;
 import jsb.ep4api.payloads.requests.CrewMemberRequest;
 import jsb.ep4api.payloads.requests.MovieFileRequest;
-import jsb.ep4api.payloads.responses.GenreResponse;
-import jsb.ep4api.payloads.responses.MovieResponse;
-import jsb.ep4api.payloads.responses.RequestResponse;
-import jsb.ep4api.payloads.responses.SpecResponse;
+import jsb.ep4api.payloads.responses.*;
 import jsb.ep4api.securities.service.AdminDetailsImp;
 import jsb.ep4api.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +45,8 @@ public class MovieController {
     VideoModeService videoModeService;
     @Autowired
     ClassificationService classificationService;
+    @Autowired
+    CategoryService categoryService;
     @Autowired
     AdminService adminService;
     @Autowired
@@ -162,6 +162,7 @@ public class MovieController {
             movieResponse.setStudio(movie.getStudio().getName());
             movieResponse.setVideoMode(movie.getVideoMode().getName());
             movieResponse.setClassification("[" + movie.getClassification().getCode() + "] " + movie.getClassification().getName());
+            movieResponse.setCategory(movie.getCategory().getName());
             movieResponse.setShowAtHome(movie.isShowAtHome());
             movieResponse.setShow(movie.isShow());
 
@@ -214,6 +215,7 @@ public class MovieController {
             for (Movie movie : movieList) {
                 MovieResponse movieResponse = new MovieResponse();
                 movieResponse.setId(movie.getId());
+                movieResponse.setSlug(movie.getSlug());
                 movieResponse.setTitle(movie.getTitle());
                 movieResponse.setOriginalTitle(movie.getOriginalTitle());
                 movieResponse.setPrice(movie.getPrice());
@@ -225,8 +227,7 @@ public class MovieController {
                 movieResponse.setStudioId(movie.getStudio().getId());
                 movieResponse.setVideoModeId(movie.getVideoMode().getId());
                 movieResponse.setClassificationId(movie.getClassification().getId());
-
-
+                movieResponse.setCategoryId(movie.getCategory().getId());
 
                 movieResponses.add(movieResponse);
             }
@@ -267,6 +268,7 @@ public class MovieController {
             for (Movie movie : movies) {
                 MovieResponse movieResponse = new MovieResponse();
                 movieResponse.setId(movie.getId());
+                movieResponse.setSlug(movie.getSlug());
                 movieResponse.setTitle(movie.getTitle());
                 movieResponse.setOriginalTitle(movie.getOriginalTitle());
                 movieResponse.setDuration(movie.getDuration());
@@ -282,10 +284,76 @@ public class MovieController {
         }
     }
 
+
     @GetMapping("/client/details/{id}")
     public ResponseEntity<?> getMovieDetailsForClient(@PathVariable Long id){
         try {
-            return null;
+            Movie movie = movieService.getMovieById(id);
+            if (movie == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MOVIE_NOT_FOUND_MESSAGE);
+            }
+            MovieResponse movieResponse = new MovieResponse();
+            movieResponse.setId(movie.getId());
+            movieResponse.setTitle(movie.getTitle());
+            movieResponse.setOriginalTitle(movie.getOriginalTitle());
+            movieResponse.setCanRent(movie.isCanRent());
+            movieResponse.setPrice(movie.getPrice());
+            movieResponse.setPackageName(movie.getAPackage().getPackageName());
+            movieResponse.setViews(movie.getViews());
+            movieResponse.setStoryLine(movie.getStoryline());
+            movieResponse.setPoster(movie.getPoster());
+            movieResponse.setTrailer(movie.getTrailer());
+            movieResponse.setDuration(movie.getDuration());
+            movieResponse.setReleaseYear(movie.getReleaseYear());
+            movieResponse.setCountry(movie.getCountry().getName());
+            movieResponse.setStudio(movie.getStudio().getName());
+            movieResponse.setVideoMode(movie.getVideoMode().getName());
+            movieResponse.setClassification("[" + movie.getClassification().getCode() + "] " + movie.getClassification().getName());
+            movieResponse.setCategory(movie.getCategory().getName());
+
+            List<MovieGenre> movieGenres = movieGenreService.getMovieGenresByMovieId(id);
+            List<String> genres = new ArrayList<>();
+            for (MovieGenre movieGenre : movieGenres) {
+                genres.add(movieGenre.getGenre().getName());
+            }
+            movieResponse.setGenres(genres);
+
+            List<MovieLanguage> movieLanguages = movieLanguageService.getMovieLanguagesByMovieId(id);
+            List<String> languageResponses = new ArrayList<>();
+            for (MovieLanguage movieLanguage : movieLanguages) {
+                languageResponses.add(movieLanguage.getLanguage().getNativeName());
+            }
+            movieResponse.setLanguages(languageResponses);
+
+            List<MovieFile> movieFiles = movieFileService.getMovieFilesByMovieId(id);
+            List<MovieFileResponse> movieFileResponses = new ArrayList<>();
+
+            for (MovieFile movieFile : movieFiles) {
+                MovieFileResponse movieFileResponse = new MovieFileResponse();
+                movieFileResponse.setId(movieFile.getId());
+                movieFileResponse.setTitle(movieFile.getTitle());
+                movieFileResponse.setFileName(movieFile.getFileName());
+                movieFileResponse.setThumbnail(movieFile.getThumbnail());
+                movieFileResponses.add(movieFileResponse);
+            }
+            movieResponse.setFiles(movieFileResponses);
+
+            List<Cast> casts = castService.getMainCastsByMovieId(id);
+            List<CastResponse> castResponses = new ArrayList<>();
+            for (Cast cast : casts) {
+                CastResponse castResponse = new CastResponse();
+                castResponse.setId(cast.getId());
+                castResponse.setActorName(cast.getActorName());
+                castResponse.setCharacterName(cast.getCharacterName());
+                castResponse.setMain(cast.isMain());
+                castResponses.add(castResponse);
+            }
+            movieResponse.setMainCasts(castResponses);
+
+//            List<CrewMember> crewMembers = crewMemberService.getCrewMembersByMovieId(id);
+
+            return ResponseEntity.ok(movieResponse);
+
         }catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -309,6 +377,7 @@ public class MovieController {
             @RequestParam("studioId") Long studioId,
             @RequestParam("videoModeId") Long videoModeId,
             @RequestParam("classificationId") Long classificationId,
+            @RequestParam("categoryId") Long categoryId,
             @RequestParam("isShow") Boolean isShow,
             @RequestParam("isShowAtHome") Boolean isShowAtHome,
             @RequestParam("genreIds") String genreIdsJson,
@@ -380,6 +449,12 @@ public class MovieController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(CLASSIFICATION_NOT_FOUND_MESSAGE);
             }
             newMovie.setClassification(classification);
+
+            Category category = categoryService.getCategoryById(categoryId);
+            if (category == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(CATEGORY_NOT_FOUND_MESSAGE);
+            }
+            newMovie.setCategory(category);
 
             AdminDetailsImp adminDetails = (AdminDetailsImp) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             Admin admin = adminService.getAdminById(adminDetails.getId());

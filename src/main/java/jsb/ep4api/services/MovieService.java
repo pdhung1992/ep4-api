@@ -91,5 +91,9 @@ public class MovieService {
         movieRepository.save(movie);
     }
 
+    public void deleteMovie(Movie movie) {
+        movie.setDeleteFlag(true);
+        movieRepository.save(movie);
+    }
 
 }

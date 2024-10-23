@@ -130,6 +130,14 @@ public class Constants {
     public static final String DELETE_CLASSIFICATION_FAIL_MESSAGE = "Delete failed! Error: ";
     public static final String CLASSIFICATION_NOT_FOUND_MESSAGE = "Classification not found!";
 
+    public static final String CREATE_CATEGORY_SUCCESS_MESSAGE = "Category created successfully!";
+    public static final String CREATE_CATEGORY_FAIL_MESSAGE = "Create failed! Error: ";
+    public static final String UPDATE_CATEGORY_SUCCESS_MESSAGE = "Category updated successfully!";
+    public static final String UPDATE_CATEGORY_FAIL_MESSAGE = "Update failed! Error: ";
+    public static final String DELETE_CATEGORY_SUCCESS_MESSAGE = "Category deleted successfully!";
+    public static final String DELETE_CATEGORY_FAIL_MESSAGE = "Delete failed! Error: ";
+    public static final String CATEGORY_NOT_FOUND_MESSAGE = "Category not found!";
+
     public static final String CREATE_GENRE_SUCCESS_MESSAGE = "Genre created successfully!";
     public static final String CREATE_GENRE_FAIL_MESSAGE = "Create failed! Error: ";
     public static final String UPDATE_GENRE_SUCCESS_MESSAGE = "Genre updated successfully!";
@@ -201,6 +209,24 @@ public class Constants {
     public static final String DELETE_MOVIE_SUCCESS = "Movie deleted successfully!";
     public static final String DELETE_MOVIE_FAIL = "Delete failed! Error: ";
     public static final String MOVIE_NOT_FOUND = "Movie not found!";
+
+    public static final String CREATE_REVIEW_SUCCESS = "Review created successfully!";
+    public static final String CREATE_REVIEW_FAIL = "Create failed! Error: ";
+    public static final String UPDATE_REVIEW_SUCCESS = "Review updated successfully!";
+    public static final String UPDATE_REVIEW_FAIL = "Update failed! Error: ";
+    public static final String DELETE_REVIEW_SUCCESS = "Review deleted successfully!";
+    public static final String DELETE_REVIEW_FAIL = "Delete failed! Error: ";
+    public static final String REVIEW_NOT_FOUND = "Review not found!";
+
+    public static final String CREATE_REVIEW_REACTION_SUCCESS = "Review reaction created successfully!";
+    public static final String CREATE_REVIEW_REACTION_FAIL = "Create failed! Error: ";
+    public static final String UPDATE_REVIEW_REACTION_SUCCESS = "Review reaction updated successfully!";
+    public static final String UPDATE_REVIEW_REACTION_FAIL = "Update failed! Error: ";
+    public static final String DELETE_REVIEW_REACTION_SUCCESS = "Review reaction deleted successfully!";
+    public static final String DELETE_REVIEW_REACTION_FAIL = "Delete failed! Error: ";
+    public static final String REVIEW_REACTION_NOT_FOUND = "Review reaction not found!";
+    public static final boolean REACTION_TYPE_LIKE = true;
+    public static final boolean REACTION_TYPE_DISLIKE = false;
 
     //Email
     public static final String REGISTER_SUCCESS_SUBJECT = "MovieX - Register Success Confirmation";

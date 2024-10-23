@@ -70,6 +70,10 @@ public class Movie {
     private Classification classification;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "created_by_admin_id")
     private Admin adminCreated;
 

@@ -24,6 +24,7 @@ public class MovieRequest {
     private Long studioId;
     private Long videoModeId;
     private Long classificationId;
+    private Long categoryId;
     private boolean isShow;
     private boolean isShowAtHome;
     private Long[] genreIds;
