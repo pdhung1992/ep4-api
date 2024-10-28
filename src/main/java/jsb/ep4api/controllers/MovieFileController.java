@@ -5,7 +5,6 @@ import jsb.ep4api.entities.Movie;
 import jsb.ep4api.payloads.responses.RequestResponse;
 import jsb.ep4api.securities.service.UserDetailsImp;
 import jsb.ep4api.services.MovieFileService;
-import jsb.ep4api.services.MovieService;
 import jsb.ep4api.services.UserMovieService;
 import jsb.ep4api.services.UserPackageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -40,7 +36,10 @@ public class MovieFileController {
     private final Path moviePath = Paths.get("public/media");
 
     @GetMapping("/{filename:.+}")
-    public ResponseEntity<?> getMovie(@PathVariable("filename") String filename) throws IOException {
+    public ResponseEntity<?> getMovie(
+            @PathVariable("filename") String filename,
+            @RequestHeader(value = "Range", required = false) String range
+    ) throws IOException {
         try {
 
             UserDetailsImp userDetails = (UserDetailsImp) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -63,18 +62,44 @@ public class MovieFileController {
             if (canWatchMovie || canWatchPackage) {
                 Path resolvedPath = moviePath.resolve(filename);
                 Resource resource = new UrlResource(resolvedPath.toUri());
-                if (resource.exists() && resource.isReadable()) {
-                    return ResponseEntity.ok()
-                            .contentType(MediaType.parseMediaType("video/mp4"))
-                            .contentLength(resource.contentLength())
-                            .body(resource);
-                } else if(resource.exists() && !resource.isReadable()) {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-                } else {
+
+                if (!resource.exists() || !resource.isReadable()) {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RequestResponse(
                             HttpStatus.NOT_FOUND.value(),
                             MOVIE_FILE_NOT_FOUND_MESSAGE
                     ));
+                }
+
+                long resourceLength = resource.contentLength();
+
+                if (range == null || range.isEmpty()) {
+                    return ResponseEntity.ok()
+                            .contentType(MediaType.parseMediaType("video/mp4"))
+                            .contentLength(resourceLength)
+                            .body(resource);
+                } else {
+                    String[] ranges = range.split("=")[1].split("-");
+                    long start = Long.parseLong(ranges[0]);
+                    long end = ranges.length > 1 ? Long.parseLong(ranges[1]) : resourceLength - 1;
+
+                    if (start >= end || end >= resourceLength) {
+                        return ResponseEntity.status(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE).body(null);
+                    }
+
+                    long contentLength = end - start + 1;
+
+                    byte[] data = new byte[(int) contentLength];
+
+                    try (var inputStream = resource.getInputStream()) {
+                        inputStream.skip(start);
+                        inputStream.read(data, 0, (int) contentLength);
+                    }
+
+                    return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
+                            .contentType(MediaType.parseMediaType("video/mp4"))
+                            .contentLength(contentLength)
+                            .header("Content-Range", "bytes " + start + "-" + end + "/" + resourceLength)
+                            .body(data);
                 }
             }
 

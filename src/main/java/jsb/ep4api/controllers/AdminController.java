@@ -1,8 +1,8 @@
 package jsb.ep4api.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.validation.Valid;
 import jsb.ep4api.config.HasFunctionAccessToClass;
-import jsb.ep4api.config.HasFunctionAccessToFunction;
 import jsb.ep4api.entities.Admin;
 import jsb.ep4api.entities.Role;
 import jsb.ep4api.payloads.requests.AdminRequest;
@@ -18,10 +18,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static jsb.ep4api.constants.Constants.*;
 
@@ -117,8 +120,15 @@ public class AdminController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createAccount(@RequestBody AdminRequest createRequest){
+    public ResponseEntity<?> createAccount(@Valid  @RequestBody AdminRequest createRequest, BindingResult result){
         try {
+            if (result.hasErrors()) {
+                List<String> errorMessages = result.getAllErrors().stream()
+                        .map(ObjectError::getDefaultMessage)
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errorMessages);
+            }
+
             if (adminService.checkExistUsername(createRequest.getUsername())){
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(USERNAME_EXIST_MESSAGE);
             }
@@ -157,8 +167,15 @@ public class AdminController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<?> updateAccount(@RequestBody AdminRequest updateRequest){
+    public ResponseEntity<?> updateAccount(@Valid @RequestBody AdminRequest updateRequest, BindingResult result){
         try {
+            if (result.hasErrors()) {
+                List<String> errorMessages = result.getAllErrors().stream()
+                        .map(ObjectError::getDefaultMessage)
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errorMessages);
+            }
+
             Admin updateAdmin = adminService.getAdminById(updateRequest.getId());
             if (updateAdmin == null){
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ADMIN_NOT_FOUND_MESSAGE);

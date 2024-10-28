@@ -1,5 +1,7 @@
 package jsb.ep4api.payloads.requests;
 
+import jakarta.validation.constraints.NotBlank;
+import jsb.ep4api.validators.annotations.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,13 +11,27 @@ import java.io.File;
 @Getter
 @Setter
 public class UserRequest {
+    @ValidId
     private Long id;
+
+    @ValidPhone
     private String phone;
+
+    @ValidFullName
     private String fullName;
+
+    @ValidEmail
     private String email;
+
+    @NotBlank
     private String phoneOrEmail;
+
+    @ValidPassword
     private String password;
+
+    @ValidPassword
     private String newPassword;
+
     private MultipartFile avatar;
 
     public UserRequest() {

@@ -48,6 +48,13 @@ public class Constants {
     public static final String DEFAULT_UPLOAD_IMAGE_DIR = "public/images";
     public static final String DEFAULT_UPLOAD_VIDEO_DIR = "public/media";
 
+    //Patterns
+    public static final String PHONE_PATTERN = "^\\d{10}$";
+    public static final String EMAIL_PATTERN = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
+    public static final String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{6,50}$";
+    public static final String SLUG_PATTERN = "^[a-z0-9-]+$";
+
+
     //Messages
     public static final String UNAUTHORIZED_MESSAGE = "Unauthorized!";
     public static final String FORBIDDEN_MESSAGE = "Forbidden!";
@@ -247,6 +254,50 @@ public class Constants {
             "<p>Best regards,</p>" +
             "<p>MovieX Team.</p>";
 
+    //Payment
+    public static final String PAYMENT_METHOD_PAYPAL = "PayPal";
+    public static final String PAYMENT_METHOD_VNPAY = "VNPay";
+
+    public static final int PAYMENT_STATUS_PENDING = 0;
+    public static final String PAYMENT_PENDING_MESSAGE = "Payment pending!";
+
+    public static final int PAYMENT_STATUS_SUCCESS = 1;
+    public static final String PAYMENT_SUCCESS_MESSAGE = "Payment success!";
+
+    public static final int PAYMENT_STATUS_FAIL = 2;
+    public static final String PAYMENT_FAIL_MESSAGE = "Payment failed!";
+
+    public static final int PAYMENT_STATUS_CANCEL = 3;
+    public static final String PAYMENT_CANCEL_MESSAGE = "Payment canceled!";
+
+    public static final int PAYMENT_STATUS_ERROR = 4;
+    public static final String PAYMENT_ERROR_MESSAGE = "Payment error!";
+
+    public static final int PAYMENT_SIGNATURE_INVALID = 5;
+    public static final String INVALID_SIGNATURE_MESSAGE = "Invalid signature!";
+
+    public static final String REDIRECT_URL_PAYMENT_SUCCESS = "http://localhost:1234/payment/success";
+    public static final String REDIRECT_URL_PAYMENT_FAIL = "http://localhost:1234/payment/fail";
+
+    public static final String TRANSACTION_NOT_FOUND_MESSAGE = "Transaction not found!";
+
+
+    //VNPay
+    public static final String VN_PAY_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+    public static final String VN_PAY_TMN_CODE = "7X7BO2T6";
+    public static final String VN_PAY_HASH_SECRET = "MTWMTCP6NKI48PLU0DE30591RD1NDMPT";
+    public static final String VN_PAY_RETURN_URL = "http://localhost:3000/loading";
+    public static final String VN_PAY_API_URL = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
+    public static final String VN_PAY_VERSION = "2.1.0";
+    public static final String VN_PAY_COMMAND = "pay";
+    public static final String VN_PAY_ORDER_TYPE = "other";
+    public static final String VN_PAY_CURRENCY_CODE = "VND";
+    public static final String VN_PAY_LOCATE = "vn";
+
+    public static final String VN_PAY_STATUS_CODE_SUCCESS = "00";
+
+    //Exchange rate API
+    public static final String EXCHANGE_RATE_API_URL = "https://v6.exchangerate-api.com/v6/e1bb810e23034bfea8bbd553/latest/USD";
 
     private Constants() {
         super();

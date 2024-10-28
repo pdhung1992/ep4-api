@@ -19,6 +19,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,6 +30,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static jsb.ep4api.constants.Constants.*;
 
@@ -57,8 +60,15 @@ public class AuthController {
 
 
     @PostMapping("/user/register")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody UserRequest registerRequest) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody UserRequest registerRequest, BindingResult result) {
         try {
+            if (result.hasErrors()) {
+                List<String> errorMessages = result.getAllErrors().stream()
+                        .map(ObjectError::getDefaultMessage)
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errorMessages);
+            }
+
             if (userService.checkPhone(registerRequest.getPhone())) {
                 return ResponseEntity.badRequest().body(PHONE_EXIST_MESSAGE);
             }
@@ -97,7 +107,7 @@ public class AuthController {
     }
 
     @PostMapping("/user/login")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody UserRequest loginRequest) {
+    public ResponseEntity<?> authenticateUser(@RequestBody UserRequest loginRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getPhoneOrEmail(), loginRequest.getPassword())
@@ -167,8 +177,16 @@ public class AuthController {
     }
 
     @PostMapping("/user/reset-password")
-    public ResponseEntity<?> resetUserPassword(@RequestBody ResetPasswordRequest resetRequest) {
+    public ResponseEntity<?> resetUserPassword(@Valid @RequestBody ResetPasswordRequest resetRequest, BindingResult result) {
         try {
+
+            if (result.hasErrors()) {
+                List<String> errorMessages = result.getAllErrors().stream()
+                        .map(ObjectError::getDefaultMessage)
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errorMessages);
+            }
+
             UserResetPasswordToken resetPasswordToken = userResetPasswordTokenService.getUserResetPasswordTokenByToken(resetRequest.getToken());
             if (resetPasswordToken == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new UserResponse(
@@ -202,8 +220,15 @@ public class AuthController {
     }
 
     @PostMapping("/user/change-password")
-    public ResponseEntity<?> changePassword(@RequestBody UserRequest changeRequest) {
+    public ResponseEntity<?> changePassword(@Valid @RequestBody UserRequest changeRequest, BindingResult result) {
         try {
+            if (result.hasErrors()) {
+                List<String> errorMessages = result.getAllErrors().stream()
+                        .map(ObjectError::getDefaultMessage)
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errorMessages);
+            }
+
             UserDetailsImp userDetails = (UserDetailsImp) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User user = userService.findById(userDetails.getId());
             if (user == null) {
@@ -269,8 +294,26 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/user/get-new-avatar")
+    public ResponseEntity<?> getUserAvatar() {
+        try {
+            UserDetailsImp userDetails = (UserDetailsImp) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            User user = userService.findById(userDetails.getId());
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(USER_NOT_FOUND_MESSAGE);
+            }
+
+            return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(
+                    HttpStatus.OK.value(),
+                    user.getAvatar()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(USER_NOT_FOUND_MESSAGE);
+        }
+    }
+
     @PostMapping("/admin/login")
-    public ResponseEntity<?> authenticateAdmin(@Valid @RequestBody AdminRequest loginRequest) {
+    public ResponseEntity<?> authenticateAdmin( @RequestBody AdminRequest loginRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
@@ -387,8 +430,15 @@ public class AuthController {
     }
 
     @PostMapping("/admin/reset-password")
-    public ResponseEntity<?> resetAdminPassword(@RequestBody ResetPasswordRequest resetRequest){
+    public ResponseEntity<?> resetAdminPassword(@Valid @RequestBody ResetPasswordRequest resetRequest, BindingResult result){
         try {
+            if (result.hasErrors()) {
+                List<String> errorMessages = result.getAllErrors().stream()
+                        .map(ObjectError::getDefaultMessage)
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errorMessages);
+            }
+
             AdminResetPasswordToken resetPasswordToken = adminResetPasswordTokenService.getAdminResetPasswordTokenByToken(resetRequest.getToken());
             if (resetPasswordToken == null){
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RequestResponse(
@@ -422,8 +472,15 @@ public class AuthController {
     }
 
     @PostMapping("/admin/change-password")
-    public ResponseEntity<?> changePassword(@RequestBody AdminRequest changeRequest){
+    public ResponseEntity<?> changePassword(@Valid @RequestBody AdminRequest changeRequest, BindingResult result){
         try {
+            if (result.hasErrors()) {
+                List<String> errorMessages = result.getAllErrors().stream()
+                        .map(ObjectError::getDefaultMessage)
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errorMessages);
+            }
+
             AdminDetailsImp adminDetails = (AdminDetailsImp) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             Admin admin = adminService.getAdminById(adminDetails.getId());
             if (admin == null){
@@ -489,7 +546,7 @@ public class AuthController {
     }
 
     @GetMapping("/admin/get-new-avatar")
-    public ResponseEntity<?> getAvatar(){
+    public ResponseEntity<?> getAdminAvatar(){
         try {
             AdminDetailsImp adminDetails = (AdminDetailsImp) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             Admin admin = adminService.getAdminById(adminDetails.getId());

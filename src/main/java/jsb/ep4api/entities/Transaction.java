@@ -28,17 +28,17 @@ public class Transaction {
     @Column(name = "gateway")
     private String gateway;
 
-    @Column(name = "trans_time")
-    private LocalDateTime transTime;
-
-    @Column(name = "expired_time")
-    private LocalDateTime expiredTime;
-
-    @Column(name = "is_expired")
-    private Boolean isExpired;
+    @Column(name = "status")
+    private int status;
 
     @Column(name = "delete_flag")
     private Boolean deleteFlag;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "modified_at")
+    private LocalDateTime modifiedAt;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

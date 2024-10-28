@@ -1,16 +1,29 @@
 package jsb.ep4api.payloads.requests;
 
+import jakarta.validation.constraints.Positive;
+import jsb.ep4api.validators.annotations.*;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class PackageRequest {
+    @ValidId
     private Long id;
+
+    @ValidEntityName
     private String name;
+
+    @ValidDescription
     private String description;
+
+    @ValidCurrency
     private Double price;
+
+    @Positive
     private Integer expirationUnit;
+
+    @ValidSlug
     private String slug;
 
     public PackageRequest() {

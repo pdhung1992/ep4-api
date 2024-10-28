@@ -1,5 +1,6 @@
 package jsb.ep4api.payloads.requests;
 
+import jsb.ep4api.validators.annotations.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
@@ -8,14 +9,30 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 public class AdminRequest {
+    @ValidId
     private Long id;
+
+    @ValidUsername
     private String username;
+
+    @ValidFullName
     private String fullName;
+
+    @ValidEmail
     private String email;
+
+    @ValidPassword
     private String password;
+
+    @ValidPassword
     private String newPassword;
+
+    @ValidToken
     private String token;
+
+    @ValidId
     private Long roleId;
+
     MultipartFile avatar;
 
     public AdminRequest() {
