@@ -12,6 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
 import static jsb.ep4api.constants.Constants.*;
 
 @Service
@@ -29,12 +33,48 @@ public class UserPackageService {
         return userPackageRepository.findOne(spec).isPresent();
     }
 
+    public boolean checkUserCanWatchPackage(Long userId, Long moviePackageId) {
+        List<Long> packagesInclude = getAllPackagesUserCanWatch(userId);
+        return packagesInclude.contains(moviePackageId);
+    }
+
+    public List<Long> getAllPackagesUserCanWatch(Long userId) {
+        Specification<UserPackage> spec = Specification.where(null);
+        spec = spec.and(UserPackageSpecifications.hasUserId(userId));
+        spec = spec.and(UserPackageSpecifications.hasNoDeletedFlag());
+        spec = spec.and(UserPackageSpecifications.hasNotExpired());
+        List<UserPackage> userPackages = userPackageRepository.findAll(spec);
+        List<Package> packages = userPackages.stream().map(UserPackage::getAPackage).toList();
+        List<Long> packageIds = new ArrayList<>();
+        for (Package aPackage : packages) {
+            String packagesInclude = aPackage.getPackagesInclude();
+            if (packagesInclude != null) {
+                String[] items = packagesInclude.replace("[","").replace("]", "").split(",");
+                for (String item : items) {
+                    packageIds.add(Long.parseLong(item.trim()));
+                }
+            }
+        }
+
+        packageIds = new ArrayList<>(new HashSet<>(packageIds));
+        return packageIds;
+    }
+
     public UserPackage getUserPackageByUserIdAndPackageId(Long userId, Long packageId) {
         Specification<UserPackage> spec = Specification.where(null);
         spec = spec.and(UserPackageSpecifications.hasUserId(userId));
         spec = spec.and(UserPackageSpecifications.hasPackageId(packageId));
         spec = spec.and(UserPackageSpecifications.hasNoDeletedFlag());
         return userPackageRepository.findOne(spec).orElse(null);
+    }
+
+    public List<Package> getPackagesByUserId(Long userId) {
+        Specification<UserPackage> spec = Specification.where(null);
+        spec = spec.and(UserPackageSpecifications.hasUserId(userId));
+        spec = spec.and(UserPackageSpecifications.hasNoDeletedFlag());
+        spec = spec.and(UserPackageSpecifications.hasNotExpired());
+        List<UserPackage> userPackages = userPackageRepository.findAll(spec);
+        return userPackages.stream().map(UserPackage::getAPackage).toList();
     }
 
     public void updateUserPackageByTransaction(Transaction transaction, User user) {

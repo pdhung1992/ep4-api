@@ -1,6 +1,7 @@
 package jsb.ep4api.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.validation.Valid;
 import jsb.ep4api.config.HasFunctionAccessToFunction;
 import jsb.ep4api.entities.Package;
 import jsb.ep4api.payloads.requests.PackageRequest;
@@ -12,10 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static jsb.ep4api.constants.Constants.*;
 
@@ -113,8 +117,15 @@ public class PackageController {
 
     @PostMapping("/create")
     @HasFunctionAccessToFunction(MOVIE_MANAGEMENT_FUNCTION)
-    public ResponseEntity<?> createPackage(@RequestBody PackageRequest createPackageRequest) {
+    public ResponseEntity<?> createPackage(@Valid @RequestBody PackageRequest createPackageRequest, BindingResult result) {
         try {
+            if (result.hasErrors()) {
+                List<String> errorMessages = result.getAllErrors().stream()
+                        .map(ObjectError::getDefaultMessage)
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errorMessages);
+            }
+
             Package newPackage = new Package();
 
             newPackage.setPackageName(createPackageRequest.getName());
@@ -140,8 +151,15 @@ public class PackageController {
 
     @PutMapping("/update")
     @HasFunctionAccessToFunction(MOVIE_MANAGEMENT_FUNCTION)
-    public ResponseEntity<?> updatePackage(@RequestBody PackageRequest updatePackageRequest) {
+    public ResponseEntity<?> updatePackage(@Valid @RequestBody PackageRequest updatePackageRequest, BindingResult result) {
         try {
+            if (result.hasErrors()) {
+                List<String> errorMessages = result.getAllErrors().stream()
+                        .map(ObjectError::getDefaultMessage)
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errorMessages);
+            }
+
             Package packageToUpdate = packageService.getPackageById(updatePackageRequest.getId());
 
             packageToUpdate.setPackageName(updatePackageRequest.getName());

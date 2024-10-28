@@ -58,8 +58,9 @@ public class MovieFileController {
             // Check if user can watch movie
             boolean canWatchMovie = userMovieService.checkUserCanWatchMovie(userId, movieId);
             boolean canWatchPackage = userPackageService.checkUserHasPackage(userId, packageId);
+            boolean canWatchByAnotherPackage = userPackageService.checkUserCanWatchPackage(userId, packageId);
 
-            if (canWatchMovie || canWatchPackage) {
+            if (canWatchMovie || canWatchPackage || canWatchByAnotherPackage) {
                 Path resolvedPath = moviePath.resolve(filename);
                 Resource resource = new UrlResource(resolvedPath.toUri());
 

@@ -1,5 +1,6 @@
 package jsb.ep4api.controllers;
 
+import jakarta.validation.Valid;
 import jsb.ep4api.entities.Movie;
 import jsb.ep4api.entities.Review;
 import jsb.ep4api.entities.User;
@@ -17,10 +18,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static jsb.ep4api.constants.Constants.*;
 
@@ -126,6 +130,8 @@ public class ReviewController {
                     reviewResponse.setMovieId(review.getMovie().getId());
                     reviewResponse.setUserId(review.getUser().getId());
                     reviewResponse.setUserName(review.getUser().getFullName());
+                    reviewResponse.setLikeCount(reviewReactionService.countReviewLikesByReviewId(review.getId()));
+                    reviewResponse.setDislikeCount(reviewReactionService.countReviewDislikesByReviewId(review.getId()));
                     reviewResponses.add(reviewResponse);
                 }
             }
@@ -157,8 +163,15 @@ public class ReviewController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createReview(@RequestBody ReviewRequest createReviewRequest) {
+    public ResponseEntity<?> createReview(@Valid @RequestBody ReviewRequest createReviewRequest, BindingResult result) {
         try {
+            if (result.hasErrors()) {
+                List<String> errorMessages = result.getAllErrors().stream()
+                        .map(ObjectError::getDefaultMessage)
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errorMessages);
+            }
+
             UserDetailsImp userDetailsImp = (UserDetailsImp) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User user = userService.getUserById(userDetailsImp.getId());
             if (user == null) {
@@ -199,7 +212,50 @@ public class ReviewController {
         }
     }
 
+    @PutMapping("/update/{reviewId}")
+    public ResponseEntity<?> updateReview(
+            @Valid
+            @PathVariable Long reviewId,
+            @RequestBody ReviewRequest updateReviewRequest,
+            BindingResult result
+    ) {
+        try {
+            if (result.hasErrors()) {
+                List<String> errorMessages = result.getAllErrors().stream()
+                        .map(ObjectError::getDefaultMessage)
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errorMessages);
+            }
 
+            UserDetailsImp userDetailsImp = (UserDetailsImp) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            User user = userService.getUserById(userDetailsImp.getId());
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RequestResponse(
+                        HttpStatus.NOT_FOUND.value(),
+                        USER_NOT_FOUND_MESSAGE
+                ));
+            }
 
+            Review review = reviewService.getReviewById(reviewId);
+            if (review == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RequestResponse(
+                        HttpStatus.NOT_FOUND.value(),
+                        REVIEW_NOT_FOUND
+                ));
+            }
 
+            review.setTitle(updateReviewRequest.getTitle());
+            review.setContent(updateReviewRequest.getContent());
+            review.setRating(updateReviewRequest.getRating());
+            review.setModifiedAt(CURRENT_TIME);
+
+            reviewService.updateReview(review);
+            return ResponseEntity.ok(new RequestResponse(
+                    HttpStatus.OK.value(),
+                    UPDATE_REVIEW_SUCCESS
+            ));
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

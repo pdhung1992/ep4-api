@@ -3,6 +3,7 @@ package jsb.ep4api.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Valid;
 import jsb.ep4api.config.HasFunctionAccessToClass;
 import jsb.ep4api.config.HasFunctionAccessToFunction;
 import jsb.ep4api.entities.*;
@@ -18,6 +19,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,6 +30,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static jsb.ep4api.constants.Constants.*;
 
@@ -362,6 +366,7 @@ public class MovieController {
     @PostMapping( "/create")
     @HasFunctionAccessToFunction(MOVIE_MANAGEMENT_FUNCTION)
     public ResponseEntity<?> createMovie(
+            @Valid
             @RequestParam("title") String title,
             @RequestParam("originalTitle") String originalTitle,
             @RequestParam("slug") String slug,
@@ -385,9 +390,17 @@ public class MovieController {
             @RequestParam("thumbnails") List<MultipartFile> thumbnails,
             @RequestParam("languageIds") String languageIdsJson,
             @RequestParam("casts") String castsJson,
-            @RequestParam("crewMembers") String crewJson
+            @RequestParam("crewMembers") String crewJson,
+            BindingResult result
     ) {
         try {
+            if (result.hasErrors()) {
+                List<String> errorMessages = result.getAllErrors().stream()
+                        .map(ObjectError::getDefaultMessage)
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errorMessages);
+            }
+
             Movie newMovie = new Movie();
 
             newMovie.setTitle(title);
@@ -615,6 +628,7 @@ public class MovieController {
     @PutMapping("/update")
     @HasFunctionAccessToFunction(MOVIE_MANAGEMENT_FUNCTION)
     public ResponseEntity<?> updateMovie(
+            @Valid
             @RequestParam("id") Long id,
             @RequestParam("title") String title,
             @RequestParam("originalTitle") String originalTitle,
@@ -638,9 +652,17 @@ public class MovieController {
             @RequestParam("thumbnails") List<MultipartFile> thumbnails,
             @RequestParam("languageIds") String languageIdsJson,
             @RequestParam("casts") String castsJson,
-            @RequestParam("crewMembers") String crewJson
+            @RequestParam("crewMembers") String crewJson,
+            BindingResult result
     ){
         try {
+            if (result.hasErrors()) {
+                List<String> errorMessages = result.getAllErrors().stream()
+                        .map(ObjectError::getDefaultMessage)
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errorMessages);
+            }
+
             Movie updateMovie = movieService.getMovieById(id);
             if (updateMovie == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MOVIE_NOT_FOUND_MESSAGE);
@@ -875,6 +897,27 @@ public class MovieController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MOVIE_NOT_FOUND_MESSAGE);
             }
             updateMovie.setShowAtHome(isShowAtHome);
+            updateMovie.setModifiedAt(CURRENT_TIME);
+
+            movieService.updateMovie(updateMovie);
+
+            return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(
+                    HttpStatus.OK.value(),
+                    UPDATE_MOVIE_SUCCESS
+            ));
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/update/views")
+    public ResponseEntity<?> updateViews(@RequestParam Long id) {
+        try {
+            Movie updateMovie = movieService.getMovieById(id);
+            if (updateMovie == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MOVIE_NOT_FOUND_MESSAGE);
+            }
+            updateMovie.setViews(updateMovie.getViews() + 1);
             updateMovie.setModifiedAt(CURRENT_TIME);
 
             movieService.updateMovie(updateMovie);

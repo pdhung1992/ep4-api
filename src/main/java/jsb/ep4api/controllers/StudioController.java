@@ -1,6 +1,7 @@
 package jsb.ep4api.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.validation.Valid;
 import jsb.ep4api.config.HasFunctionAccessToFunction;
 import jsb.ep4api.entities.Country;
 import jsb.ep4api.entities.Studio;
@@ -14,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,6 +26,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static jsb.ep4api.constants.Constants.*;
 
@@ -128,8 +132,15 @@ public class StudioController {
 
     @PostMapping("/create")
     @HasFunctionAccessToFunction(MOVIE_MANAGEMENT_FUNCTION)
-    public ResponseEntity<?> createStudio(@ModelAttribute StudioRequest createStudioRequest) {
+    public ResponseEntity<?> createStudio(@Valid @ModelAttribute StudioRequest createStudioRequest, BindingResult result) {
         try {
+            if (result.hasErrors()) {
+                List<String> errorMessages = result.getAllErrors().stream()
+                        .map(ObjectError::getDefaultMessage)
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errorMessages);
+            }
+
             Country country = countryService.getCountryById(createStudioRequest.getCountryId());
             if (country == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(COUNTRY_NOT_FOUND_MESSAGE);
@@ -195,8 +206,15 @@ public class StudioController {
 
     @PutMapping("/update")
     @HasFunctionAccessToFunction(MOVIE_MANAGEMENT_FUNCTION)
-    public ResponseEntity<?> updateStudio(@ModelAttribute StudioRequest updateStudioRequest) {
+    public ResponseEntity<?> updateStudio(@Valid @ModelAttribute StudioRequest updateStudioRequest, BindingResult result) {
         try {
+            if (result.hasErrors()) {
+                List<String> errorMessages = result.getAllErrors().stream()
+                        .map(ObjectError::getDefaultMessage)
+                        .collect(Collectors.toList());
+                return ResponseEntity.badRequest().body(errorMessages);
+            }
+
             Studio updateStudio = studioService.getStudioById(updateStudioRequest.getId());
             if (updateStudio == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(STUDIO_NOT_FOUND_MESSAGE);
