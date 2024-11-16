@@ -35,6 +35,9 @@ public class MovieRequest {
     private MultipartFile poster;
 
     @NotNull
+    private MultipartFile image;
+
+    @NotNull
     private String trailer;
 
     @Positive

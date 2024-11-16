@@ -4,15 +4,14 @@ package jsb.ep4api.controllers;
 import jsb.ep4api.entities.Movie;
 import jsb.ep4api.payloads.responses.RequestResponse;
 import jsb.ep4api.securities.service.UserDetailsImp;
-import jsb.ep4api.services.MovieFileService;
-import jsb.ep4api.services.UserMovieService;
-import jsb.ep4api.services.UserPackageService;
+import jsb.ep4api.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +28,11 @@ public class MovieFileController {
     @Autowired
     private UserMovieService userMovieService;
     @Autowired
+    MovieService movieService;
+    @Autowired
     private UserPackageService userPackageService;
+    @Autowired
+    PackageService packageService;
     @Autowired
     private MovieFileService movieFileService;
 
@@ -56,11 +59,13 @@ public class MovieFileController {
             Long packageId = movie.getAPackage().getId();
 
             // Check if user can watch movie
+            boolean isFreeMovie = movieService.checkMovieIsFree(movieId);
+            boolean isFreePackage = packageService.checkPackageIsFree(packageId);
             boolean canWatchMovie = userMovieService.checkUserCanWatchMovie(userId, movieId);
             boolean canWatchPackage = userPackageService.checkUserHasPackage(userId, packageId);
             boolean canWatchByAnotherPackage = userPackageService.checkUserCanWatchPackage(userId, packageId);
 
-            if (canWatchMovie || canWatchPackage || canWatchByAnotherPackage) {
+            if (isFreeMovie || isFreePackage || canWatchMovie || canWatchPackage || canWatchByAnotherPackage) {
                 Path resolvedPath = moviePath.resolve(filename);
                 Resource resource = new UrlResource(resolvedPath.toUri());
 

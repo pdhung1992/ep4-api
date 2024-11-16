@@ -20,6 +20,14 @@ public class PackageSpecifications {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("price"), price);
     }
 
+    public static Specification<Package> isNotFreePackage() {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.notEqual(root.get("price"), 0);
+    }
+
+    public static Specification<Package> isFreePackage() {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("price"), 0);
+    }
+
     public static Specification<Package> hasPriceBetween(Double minPrice, Double maxPrice) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("price"), minPrice, maxPrice);
     }

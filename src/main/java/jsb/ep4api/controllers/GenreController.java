@@ -31,6 +31,7 @@ public class GenreController {
                         response.setId(genre.getId());
                         response.setName(genre.getName());
                         response.setDescription(genre.getDescription());
+                        response.setImage(genre.getImage());
                         response.setSlug(genre.getSlug());
                         return response;
                     }

@@ -46,12 +46,29 @@ public class PackageService {
         return packageRepository.findAll(spec);
     }
 
+    public List<Package> getNotFreePackages(){
+        Specification<Package> spec = Specification.where(null);
+        spec = spec.and(PackageSpecifications.isNotFreePackage());
+        spec = spec.and(PackageSpecifications.hasNoDeleteFlag());
+
+        return packageRepository.findAll(spec);
+    }
+
     public Package getPackageById(Long id){
         Specification<Package> spec = Specification.where(null);
         spec = spec.and(PackageSpecifications.hasId(id));
         spec = spec.and(PackageSpecifications.hasNoDeleteFlag());
 
         return packageRepository.findOne(spec).orElse(null);
+    }
+
+    public boolean checkPackageIsFree(Long id){
+        Specification<Package> spec = Specification.where(null);
+        spec = spec.and(PackageSpecifications.hasId(id));
+        spec = spec.and(PackageSpecifications.isFreePackage());
+        spec = spec.and(PackageSpecifications.hasNoDeleteFlag());
+
+        return packageRepository.findOne(spec).isPresent();
     }
 
     public void createPackage(Package pkg){

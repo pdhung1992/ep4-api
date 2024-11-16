@@ -4,6 +4,10 @@ import jsb.ep4api.entities.User;
 import jsb.ep4api.repositories.UserRepository;
 import jsb.ep4api.specifications.UserSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +24,37 @@ public class UserService {
     //Check if an email is already in use
     public boolean checkEmail(String email){
         return userRepository.existsByEmail(email);
+    }
+
+    public Page<User> getAllUsers(
+            Integer pageNo,
+            Integer pageSize,
+            String sortField,
+            String sortDir,
+            String fullName,
+            String phone,
+            String email
+    )
+    {
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ?
+                Sort.by(sortField).ascending() :
+                Sort.by(sortField).descending();
+        Pageable pageable = PageRequest.of(pageNo - 1, pageSize, sort);
+
+        Specification<User> spec = Specification.where(null);
+        if(fullName != null){
+            spec = spec.and(UserSpecifications.hasFullNameInclude(fullName));
+        }
+        if(phone != null){
+            spec = spec.and(UserSpecifications.hasPhoneInclude(phone));
+        }
+        if(email != null){
+            spec = spec.and(UserSpecifications.hasEmailInclude(email));
+        }
+        spec = spec.and(UserSpecifications.hasNoDeletedFlag());
+
+        return userRepository.findAll(spec, pageable);
+
     }
 
     //Find a user by id

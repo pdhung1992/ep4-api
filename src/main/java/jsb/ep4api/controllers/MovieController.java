@@ -13,11 +13,14 @@ import jsb.ep4api.payloads.requests.CrewMemberRequest;
 import jsb.ep4api.payloads.requests.MovieFileRequest;
 import jsb.ep4api.payloads.responses.*;
 import jsb.ep4api.securities.service.AdminDetailsImp;
+import jsb.ep4api.securities.service.UserDetailsImp;
 import jsb.ep4api.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -40,7 +43,11 @@ public class MovieController {
     @Autowired
     private MovieService movieService;
     @Autowired
+    UserMovieService userMovieService;
+    @Autowired
     PackageService packageService;
+    @Autowired
+    UserPackageService userPackageService;
     @Autowired
     CountryService countryService;
     @Autowired
@@ -69,6 +76,10 @@ public class MovieController {
     CrewMemberService crewMemberService;
     @Autowired
     CrewPositionService crewPositionService;
+    @Autowired
+    RatingService ratingService;
+    @Autowired
+    ReviewService reviewService;
 
     @GetMapping("/admin")
     @HasFunctionAccessToFunction(MOVIE_MANAGEMENT_FUNCTION)
@@ -159,6 +170,7 @@ public class MovieController {
             movieResponse.setViews(movie.getViews());
             movieResponse.setStoryLine(movie.getStoryline());
             movieResponse.setPoster(movie.getPoster());
+            movieResponse.setImage(movie.getImage());
             movieResponse.setTrailer(movie.getTrailer());
             movieResponse.setDuration(movie.getDuration());
             movieResponse.setReleaseYear(movie.getReleaseYear());
@@ -171,9 +183,13 @@ public class MovieController {
             movieResponse.setShow(movie.isShow());
 
             List<MovieGenre> movieGenres = movieGenreService.getMovieGenresByMovieId(id);
-            List<String> genres = new ArrayList<>();
+            List<GenreResponse> genres = new ArrayList<>();
             for (MovieGenre movieGenre : movieGenres) {
-                genres.add(movieGenre.getGenre().getName());
+                GenreResponse genreResponse = new GenreResponse();
+                genreResponse.setId(movieGenre.getGenre().getId());
+                genreResponse.setName(movieGenre.getGenre().getName());
+                genreResponse.setSlug(movieGenre.getGenre().getSlug());
+                genres.add(genreResponse);
             }
             movieResponse.setGenres(genres);
 
@@ -278,6 +294,19 @@ public class MovieController {
                 movieResponse.setDuration(movie.getDuration());
                 movieResponse.setReleaseYear(movie.getReleaseYear());
                 movieResponse.setPoster(movie.getPoster());
+                movieResponse.setImage(movie.getImage());
+                movieResponse.setClassification(movie.getClassification().getCode());
+                movieResponse.setVideoMode(movie.getVideoMode().getCode());
+                List<MovieGenre> movieGenres = movieGenreService.getMovieGenresByMovieId(movie.getId());
+                List<GenreResponse> genres = new ArrayList<>();
+                for (MovieGenre movieGenre : movieGenres) {
+                    GenreResponse genreResponse = new GenreResponse();
+                    genreResponse.setId(movieGenre.getGenre().getId());
+                    genreResponse.setName(movieGenre.getGenre().getName());
+                    genreResponse.setSlug(movieGenre.getGenre().getSlug());
+                    genres.add(genreResponse);
+                }
+                movieResponse.setGenres(genres);
 
                 movieResponses.add(movieResponse);
             }
@@ -288,48 +317,212 @@ public class MovieController {
         }
     }
 
-
-    @GetMapping("/client/details/{id}")
-    public ResponseEntity<?> getMovieDetailsForClient(@PathVariable Long id){
+    @GetMapping("/client/home/category/{categoryId}")
+    public ResponseEntity<?> get10MoviesByCategoryId(
+            @PathVariable Long categoryId
+    ) {
         try {
-            Movie movie = movieService.getMovieById(id);
+            Category category = categoryService.getCategoryById(categoryId);
+            if (category == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(CATEGORY_NOT_FOUND_MESSAGE);
+            }
+            List<Movie> movies = movieService.get10MoviesByCategoryId(category.getId());
+            List<MovieResponse> movieResponses = new ArrayList<>();
+
+            for (Movie movie : movies) {
+                MovieResponse movieResponse = new MovieResponse();
+                movieResponse.setId(movie.getId());
+                movieResponse.setSlug(movie.getSlug());
+                movieResponse.setTitle(movie.getTitle());
+                movieResponse.setOriginalTitle(movie.getOriginalTitle());
+                movieResponse.setDuration(movie.getDuration());
+                movieResponse.setReleaseYear(movie.getReleaseYear());
+                movieResponse.setPoster(movie.getPoster());
+                movieResponse.setImage(movie.getImage());
+                movieResponse.setClassification(movie.getClassification().getCode());
+                movieResponse.setVideoMode(movie.getVideoMode().getCode());
+                List<MovieGenre> movieGenres = movieGenreService.getMovieGenresByMovieId(movie.getId());
+                List<GenreResponse> genres = new ArrayList<>();
+                for (MovieGenre movieGenre : movieGenres) {
+                    GenreResponse genreResponse = new GenreResponse();
+                    genreResponse.setId(movieGenre.getGenre().getId());
+                    genreResponse.setName(movieGenre.getGenre().getName());
+                    genreResponse.setSlug(movieGenre.getGenre().getSlug());
+                    genres.add(genreResponse);
+                }
+                movieResponse.setGenres(genres);
+                Double rating = ratingService.getAverageRatingByMovieId(movie.getId());
+                Long ratingCount = ratingService.getRatingCountByMovieId(movie.getId());
+                movieResponse.setRating(rating);
+                movieResponse.setRatingCount(ratingCount);
+
+                movieResponses.add(movieResponse);
+            }
+
+            return ResponseEntity.ok(movieResponses);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/client/genre/best/{slug}")
+    public ResponseEntity<?> get10BestMoviesByGenres(@PathVariable String slug) {
+        try {
+            Genre genre = genreService.getGenreBySlug(slug);
+            if (genre == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(GENRE_NOT_FOUND_MESSAGE);
+            }
+            List<Long> movieIds = movieGenreService.getMovieIdsByGenreId(genre.getId());
+            List<Movie> movies = movieService.get10MoviesBestByGenreId(movieIds);
+            System.out.printf("Movies: %s\n", movies);
+            List<MovieResponse> movieResponses = new ArrayList<>();
+            for (Movie movie : movies) {
+                MovieResponse movieResponse = new MovieResponse();
+                movieResponse.setId(movie.getId());
+                movieResponse.setSlug(movie.getSlug());
+                movieResponse.setTitle(movie.getTitle());
+                movieResponse.setOriginalTitle(movie.getOriginalTitle());
+                movieResponse.setDuration(movie.getDuration());
+                movieResponse.setReleaseYear(movie.getReleaseYear());
+                movieResponse.setPoster(movie.getPoster());
+                movieResponse.setImage(movie.getImage());
+                movieResponse.setClassification(movie.getClassification().getCode());
+                movieResponse.setVideoMode(movie.getVideoMode().getCode());
+                List<MovieGenre> movieGenres = movieGenreService.getMovieGenresByMovieId(movie.getId());
+                List<GenreResponse> genres = new ArrayList<>();
+                for (MovieGenre movieGenre : movieGenres) {
+                    GenreResponse genreResponse = new GenreResponse();
+                    genreResponse.setId(movieGenre.getGenre().getId());
+                    genreResponse.setName(movieGenre.getGenre().getName());
+                    genreResponse.setSlug(movieGenre.getGenre().getSlug());
+                    genres.add(genreResponse);
+                }
+                movieResponse.setGenres(genres);
+                Double rating = ratingService.getAverageRatingByMovieId(movie.getId());
+                Long ratingCount = ratingService.getRatingCountByMovieId(movie.getId());
+                movieResponse.setRating(rating);
+                movieResponse.setRatingCount(ratingCount);
+                movieResponse.setViews(movie.getViews());
+
+                movieResponses.add(movieResponse);
+            }
+
+            return ResponseEntity.ok(movieResponses);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/client/details/related/{movieId}")
+    public ResponseEntity<?> getRelatedMovieAtDetailsPage(
+            @PathVariable Long movieId
+    ) {
+        try {
+            Movie movie = movieService.getMovieById(movieId);
             if (movie == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MOVIE_NOT_FOUND_MESSAGE);
             }
+            List<Movie> movies = movieService.get4MoviesByCategoryId(movie.getCategory().getId(), movie.getId());
+            List<MovieResponse> movieResponses = new ArrayList<>();
+
+            for (Movie relatedMovie : movies) {
+                MovieResponse movieResponse = new MovieResponse();
+                movieResponse.setId(relatedMovie.getId());
+                movieResponse.setSlug(relatedMovie.getSlug());
+                movieResponse.setTitle(relatedMovie.getTitle());
+                movieResponse.setOriginalTitle(relatedMovie.getOriginalTitle());
+                movieResponse.setDuration(relatedMovie.getDuration());
+                movieResponse.setReleaseYear(relatedMovie.getReleaseYear());
+                movieResponse.setPoster(relatedMovie.getPoster());
+                movieResponse.setImage(relatedMovie.getImage());
+                movieResponse.setClassification(relatedMovie.getClassification().getCode());
+                movieResponse.setVideoMode(relatedMovie.getVideoMode().getCode());
+                List<MovieGenre> movieGenres = movieGenreService.getMovieGenresByMovieId(relatedMovie.getId());
+                List<GenreResponse> genres = new ArrayList<>();
+                for (MovieGenre movieGenre : movieGenres) {
+                    GenreResponse genreResponse = new GenreResponse();
+                    genreResponse.setId(movieGenre.getGenre().getId());
+                    genreResponse.setName(movieGenre.getGenre().getName());
+                    genreResponse.setSlug(movieGenre.getGenre().getSlug());
+                    genres.add(genreResponse);
+                }
+                movieResponse.setGenres(genres);
+                Double rating = ratingService.getAverageRatingByMovieId(movie.getId());
+                Long ratingCount = ratingService.getRatingCountByMovieId(movie.getId());
+                movieResponse.setRating(rating);
+                movieResponse.setRatingCount(ratingCount);
+
+                movieResponses.add(movieResponse);
+            }
+
+            return ResponseEntity.ok(movieResponses);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/client/details/{slug}/{userId}")
+    public ResponseEntity<?> getMovieDetailsForClient(@PathVariable String slug,
+                                                      @PathVariable Long userId
+    ){
+        try {
+            Movie movie = movieService.getMovieBySlug(slug);
+            if (movie == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MOVIE_NOT_FOUND_MESSAGE);
+            }
+            Double rating = ratingService.getAverageRatingByMovieId(movie.getId());
+            Long ratingCount = ratingService.getRatingCountByMovieId(movie.getId());
+            int userRating = 0;
+            if (userId != null){
+                userRating = ratingService.getRatingValueByUserIdAndMovieId(userId, movie.getId());
+            }
+            Long reviewCount = reviewService.getReviewCountByMovieId(movie.getId());
+
             MovieResponse movieResponse = new MovieResponse();
             movieResponse.setId(movie.getId());
             movieResponse.setTitle(movie.getTitle());
             movieResponse.setOriginalTitle(movie.getOriginalTitle());
             movieResponse.setCanRent(movie.isCanRent());
             movieResponse.setPrice(movie.getPrice());
+            movieResponse.setPackageId(movie.getAPackage().getId());
             movieResponse.setPackageName(movie.getAPackage().getPackageName());
+            movieResponse.setPackagePrice(movie.getAPackage().getPrice());
             movieResponse.setViews(movie.getViews());
             movieResponse.setStoryLine(movie.getStoryline());
             movieResponse.setPoster(movie.getPoster());
+            movieResponse.setImage(movie.getImage());
             movieResponse.setTrailer(movie.getTrailer());
             movieResponse.setDuration(movie.getDuration());
             movieResponse.setReleaseYear(movie.getReleaseYear());
             movieResponse.setCountry(movie.getCountry().getName());
             movieResponse.setStudio(movie.getStudio().getName());
-            movieResponse.setVideoMode(movie.getVideoMode().getName());
+            movieResponse.setVideoMode(movie.getVideoMode().getCode());
             movieResponse.setClassification("[" + movie.getClassification().getCode() + "] " + movie.getClassification().getName());
             movieResponse.setCategory(movie.getCategory().getName());
+            movieResponse.setRating(rating);
+            movieResponse.setUserRating(userRating);
+            movieResponse.setRatingCount(ratingCount);
+            movieResponse.setReviewCount(reviewCount);
 
-            List<MovieGenre> movieGenres = movieGenreService.getMovieGenresByMovieId(id);
-            List<String> genres = new ArrayList<>();
+            List<MovieGenre> movieGenres = movieGenreService.getMovieGenresByMovieId(movie.getId());
+            List<GenreResponse> genres = new ArrayList<>();
             for (MovieGenre movieGenre : movieGenres) {
-                genres.add(movieGenre.getGenre().getName());
+                GenreResponse genreResponse = new GenreResponse();
+                genreResponse.setId(movieGenre.getGenre().getId());
+                genreResponse.setName(movieGenre.getGenre().getName());
+                genreResponse.setSlug(movieGenre.getGenre().getSlug());
+                genres.add(genreResponse);
             }
             movieResponse.setGenres(genres);
 
-            List<MovieLanguage> movieLanguages = movieLanguageService.getMovieLanguagesByMovieId(id);
+            List<MovieLanguage> movieLanguages = movieLanguageService.getMovieLanguagesByMovieId(movie.getId());
             List<String> languageResponses = new ArrayList<>();
             for (MovieLanguage movieLanguage : movieLanguages) {
                 languageResponses.add(movieLanguage.getLanguage().getNativeName());
             }
             movieResponse.setLanguages(languageResponses);
 
-            List<MovieFile> movieFiles = movieFileService.getMovieFilesByMovieId(id);
+            List<MovieFile> movieFiles = movieFileService.getMovieFilesByMovieId(movie.getId());
             List<MovieFileResponse> movieFileResponses = new ArrayList<>();
 
             for (MovieFile movieFile : movieFiles) {
@@ -342,7 +535,7 @@ public class MovieController {
             }
             movieResponse.setFiles(movieFileResponses);
 
-            List<Cast> casts = castService.getMainCastsByMovieId(id);
+            List<Cast> casts = castService.getMainCastsByMovieId(movie.getId());
             List<CastResponse> castResponses = new ArrayList<>();
             for (Cast cast : casts) {
                 CastResponse castResponse = new CastResponse();
@@ -354,7 +547,10 @@ public class MovieController {
             }
             movieResponse.setMainCasts(castResponses);
 
-//            List<CrewMember> crewMembers = crewMemberService.getCrewMembersByMovieId(id);
+            CrewMember director = crewMemberService.getDirectorByMovieId(movie.getId());
+            if (director != null) {
+                movieResponse.setDirector(director.getName());
+            }
 
             return ResponseEntity.ok(movieResponse);
 
@@ -363,10 +559,41 @@ public class MovieController {
         }
     }
 
+    @GetMapping("/client/check-user-rights/{id}")
+    public boolean checkUserRight(
+            @PathVariable Long id
+    ) {
+        try {
+            UserDetailsImp userDetails = (UserDetailsImp) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            Long userId = userDetails.getId();
+
+            Movie movie = movieService.getMovieById(id);
+            if (movie == null) {
+                return false;
+            }
+            Long movieId = movie.getId();
+            Long packageId = movie.getAPackage().getId();
+
+            // Check if user can watch movie
+            boolean isFreeMovie = movieService.checkMovieIsFree(movieId);
+            boolean isFreePackage = packageService.checkPackageIsFree(packageId);
+            boolean canWatchMovie = userMovieService.checkUserCanWatchMovie(userId, movieId);
+            boolean canWatchPackage = userPackageService.checkUserHasPackage(userId, packageId);
+            boolean canWatchByAnotherPackage = userPackageService.checkUserCanWatchPackage(userId, packageId);
+
+            if (isFreeMovie || isFreePackage || canWatchMovie || canWatchPackage || canWatchByAnotherPackage) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     @PostMapping( "/create")
     @HasFunctionAccessToFunction(MOVIE_MANAGEMENT_FUNCTION)
     public ResponseEntity<?> createMovie(
-            @Valid
             @RequestParam("title") String title,
             @RequestParam("originalTitle") String originalTitle,
             @RequestParam("slug") String slug,
@@ -375,6 +602,7 @@ public class MovieController {
             @RequestParam("packageId") Long packageId,
             @RequestParam("storyline") String storyline,
             @RequestParam("poster") MultipartFile poster,
+            @RequestParam("image") MultipartFile image,
             @RequestParam("trailer") String trailer,
             @RequestParam("duration") Integer duration,
             @RequestParam("releaseYear") Integer releaseYear,
@@ -390,16 +618,15 @@ public class MovieController {
             @RequestParam("thumbnails") List<MultipartFile> thumbnails,
             @RequestParam("languageIds") String languageIdsJson,
             @RequestParam("casts") String castsJson,
-            @RequestParam("crewMembers") String crewJson,
-            BindingResult result
+            @RequestParam("crewMembers") String crewJson
     ) {
         try {
-            if (result.hasErrors()) {
-                List<String> errorMessages = result.getAllErrors().stream()
-                        .map(ObjectError::getDefaultMessage)
-                        .collect(Collectors.toList());
-                return ResponseEntity.badRequest().body(errorMessages);
-            }
+//            if (result.hasErrors()) {
+//                List<String> errorMessages = result.getAllErrors().stream()
+//                        .map(ObjectError::getDefaultMessage)
+//                        .collect(Collectors.toList());
+//                return ResponseEntity.badRequest().body(errorMessages);
+//            }
 
             Movie newMovie = new Movie();
 
@@ -416,8 +643,10 @@ public class MovieController {
             newMovie.setAPackage(aPackage);
 
             newMovie.setViews(0L);
+            System.out.println("Length of storyline: " + storyline.length());
             newMovie.setStoryline(storyline);
 
+            //Handle poster
             if (poster != null) {
                 MultipartFile posterFile = poster;
                 File uploadDir = new File(DEFAULT_UPLOAD_IMAGE_DIR);
@@ -433,6 +662,24 @@ public class MovieController {
                 newMovie.setPoster(posterUniqFilename);
             } else {
                 newMovie.setPoster(DEFAULT_POSTER);
+            }
+
+            //Handle image
+            if (image != null) {
+                MultipartFile imageFile = image;
+                File uploadDir = new File(DEFAULT_UPLOAD_IMAGE_DIR);
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdirs();
+                }
+
+                String imageOriginalFilename = imageFile.getOriginalFilename();
+                String imageFileExtension = imageOriginalFilename.substring(imageOriginalFilename.lastIndexOf("."));
+                String imageUniqFilename = System.currentTimeMillis() + imageFileExtension;
+                String imagePath = uploadDir.getAbsolutePath() + "/" + imageUniqFilename;
+                Files.copy(imageFile.getInputStream(), Paths.get(imagePath), StandardCopyOption.REPLACE_EXISTING);
+                newMovie.setImage(imageUniqFilename);
+            } else {
+                newMovie.setImage(DEFAULT_IMAGE);
             }
 
             newMovie.setTrailer(trailer);

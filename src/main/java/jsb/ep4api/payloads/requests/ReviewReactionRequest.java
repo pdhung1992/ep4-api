@@ -9,9 +9,6 @@ import lombok.Setter;
 @Setter
 public class ReviewReactionRequest {
     @ValidId
-    private Long reviewReactionId;
-
-    @ValidId
     private Long reviewId;
 
     @ValidId

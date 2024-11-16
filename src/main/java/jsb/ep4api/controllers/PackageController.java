@@ -115,6 +115,28 @@ public class PackageController {
         }
     }
 
+    @GetMapping("/not-free")
+    public ResponseEntity<?> getNotFreePackages() {
+        try {
+            List<Package> packages = packageService.getNotFreePackages();
+            List<PackageResponse> packageResponses = new ArrayList<>();
+
+            if (!packages.isEmpty()) {
+                for (Package p : packages) {
+                    PackageResponse packageResponse = new PackageResponse();
+                    packageResponse.setId(p.getId());
+                    packageResponse.setName(p.getPackageName());
+                    packageResponse.setPrice(p.getPrice());
+                    packageResponses.add(packageResponse);
+                }
+            }
+
+            return ResponseEntity.ok(packageResponses);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @PostMapping("/create")
     @HasFunctionAccessToFunction(MOVIE_MANAGEMENT_FUNCTION)
     public ResponseEntity<?> createPackage(@Valid @RequestBody PackageRequest createPackageRequest, BindingResult result) {

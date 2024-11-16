@@ -5,12 +5,14 @@ import jsb.ep4api.entities.*;
 import jsb.ep4api.entities.Package;
 import jsb.ep4api.payloads.requests.TransactionRequest;
 import jsb.ep4api.payloads.requests.VNPayRequest;
+import jsb.ep4api.payloads.responses.RequestResponse;
 import jsb.ep4api.payloads.responses.VNPayResponse;
 import jsb.ep4api.securities.service.UserDetailsImp;
 import jsb.ep4api.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -138,7 +140,15 @@ public class VNPayPaymentController {
     @GetMapping("/ipn")
     public ResponseEntity<?> returnIPN(HttpServletRequest request) {
         try {
-            UserDetailsImp userDetails = (UserDetailsImp) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("fuck");
+            }
+
+            UserDetailsImp userDetails = (UserDetailsImp) authentication.getPrincipal();
+            if (userDetails == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("you");
+            }
             Long userId = userDetails.getId();
             User user = userService.findById(userId);
 
@@ -188,7 +198,10 @@ public class VNPayPaymentController {
                     }
 
                     //Return success message
-                    return ResponseEntity.status(HttpStatus.OK).body(PAYMENT_SUCCESS_MESSAGE);
+                    return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(
+                            HttpStatus.OK.value(),
+                            PAYMENT_SUCCESS_MESSAGE
+                    ));
                 } else {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(PAYMENT_FAIL_MESSAGE);
                 }

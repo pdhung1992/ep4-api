@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ResetPasswordRequest {
-    @ValidEmail
+
     private String email;
 
     @ValidPassword

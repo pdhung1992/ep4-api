@@ -16,9 +16,11 @@ public class MovieResponse {
     private double price;
     private Long packageId;
     private String packageName;
+    private Double packagePrice;
     private Long views;
     private String storyLine;
     private String poster;
+    private String image;
     private String trailer;
     private int duration;
     private int releaseYear;
@@ -32,11 +34,16 @@ public class MovieResponse {
     private String classification;
     private Long categoryId;
     private String category;
+    private Double rating;
+    private int userRating;
+    private Long ratingCount;
+    private Long reviewCount;
     private boolean isShowAtHome;
     private boolean isShow;
     private List<MovieFileResponse> files;
+    private String director;
     private List<CastResponse> mainCasts;
-    private List<String> genres;
+    private List<GenreResponse> genres;
     private List<CrewMemberResponse> crewMembers;
     private List<String> languages;
 

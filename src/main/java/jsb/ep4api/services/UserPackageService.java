@@ -84,9 +84,11 @@ public class UserPackageService {
         if (userPackage != null) {
             if (userPackage.getExpiredAt().isAfter(CURRENT_TIME)) {
                 userPackage.setExpiredAt(userPackage.getExpiredAt().plusDays(aPackage.getExpirationUnit()));
+                userPackage.setModifiedAt(CURRENT_TIME);
                 updateUserPackage(userPackage);
             } else {
                 userPackage.setExpiredAt(CURRENT_TIME.plusDays(aPackage.getExpirationUnit()));
+                userPackage.setModifiedAt(CURRENT_TIME);
                 updateUserPackage(userPackage);
             }
         } else {
@@ -94,6 +96,9 @@ public class UserPackageService {
             userPackage.setUser(user);
             userPackage.setAPackage(aPackage);
             userPackage.setExpiredAt(CURRENT_TIME.plusDays(aPackage.getExpirationUnit()));
+            userPackage.setDeleteFlag(DEFAULT_DELETE_FLAG);
+            userPackage.setCreatedAt(CURRENT_TIME);
+            userPackage.setModifiedAt(CURRENT_TIME);
             createUserPackage(userPackage);
         }
     }

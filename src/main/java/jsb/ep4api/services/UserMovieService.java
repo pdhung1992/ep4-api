@@ -12,8 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import static jsb.ep4api.constants.Constants.CURRENT_TIME;
-import static jsb.ep4api.constants.Constants.MOVIE_NOT_FOUND_MESSAGE;
+import static jsb.ep4api.constants.Constants.*;
 
 @Service
 public class UserMovieService {
@@ -45,9 +44,11 @@ public class UserMovieService {
         if (userMovie != null) {
             if (userMovie.getExpiredAt().isAfter(CURRENT_TIME)) {
                 userMovie.setExpiredAt(userMovie.getExpiredAt().plusDays(60));
+                userMovie.setModifiedAt(CURRENT_TIME);
                 updateUserMovie(userMovie);
             } else {
                 userMovie.setExpiredAt(CURRENT_TIME.plusDays(60));
+                userMovie.setModifiedAt(CURRENT_TIME);
                 updateUserMovie(userMovie);
             }
         } else {
@@ -55,6 +56,9 @@ public class UserMovieService {
             userMovie.setUser(user);
             userMovie.setMovie(movie);
             userMovie.setExpiredAt(CURRENT_TIME.plusDays(60));
+            userMovie.setCreatedAt(CURRENT_TIME);
+            userMovie.setModifiedAt(CURRENT_TIME);
+            userMovie.setDeleteFlag(DEFAULT_DELETE_FLAG);
             createUserMovie(userMovie);
         }
     }

@@ -12,6 +12,10 @@ public class CrewMemberSpecifications {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("movie").get("id"), movieId);
     }
 
+    public static Specification<CrewMember> isDirector() {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("crewPosition").get("name"), "Director");
+    }
+
     public static Specification<CrewMember> hasNoDeleteFlag() {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("deleteFlag"), false);
     }

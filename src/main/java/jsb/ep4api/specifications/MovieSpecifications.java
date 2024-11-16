@@ -1,12 +1,44 @@
 package jsb.ep4api.specifications;
 
+import jsb.ep4api.entities.Genre;
 import jsb.ep4api.entities.Movie;
+import jsb.ep4api.entities.MovieGenre;
+import org.hibernate.mapping.Join;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.List;
 
 public class MovieSpecifications {
     public static Specification<Movie> hasId(Long id) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("id"), id);
     }
+
+    public static Specification<Movie> hasIdNot(Long id) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.notEqual(root.get("id"), id);
+    }
+
+    public static Specification<Movie> randomOrder() {
+        return (root, query, criteriaBuilder) -> {
+            query.orderBy(criteriaBuilder.asc(criteriaBuilder.function("RAND", Double.class)));
+            return query.getRestriction();
+        };
+    }
+
+    public static Specification<Movie> orderByViews() {
+        return (root, query, criteriaBuilder) -> {
+            query.orderBy(criteriaBuilder.desc(root.get("views")));
+            return query.getRestriction();
+        };
+    }
+
+    public static Specification<Movie> hasIdIn(List<Long> ids) {
+        return (root, query, criteriaBuilder) -> root.get("id").in(ids);
+    }
+
+    public static Specification<Movie> hasSlug(String slug) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("slug"), slug);
+    }
+
     public static Specification<Movie> titleContains(String title) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.like(root.get("title"), "%" + title + "%");
     }
@@ -40,6 +72,10 @@ public class MovieSpecifications {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("canRent"), canRent);
     }
 
+    public static Specification<Movie> isFreeMovie() {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("price"), 0);
+    }
+
     public static Specification<Movie> hasPriceBetween(double minPrice, double maxPrice) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("price"), minPrice, maxPrice);
     }
@@ -57,7 +93,7 @@ public class MovieSpecifications {
     }
 
     public static Specification<Movie> belongsToCategory(Long categoryId) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.join("categories").get("id"), categoryId);
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("category").get("id"), categoryId);
     }
 
     public static Specification<Movie> hasShowFlag(boolean isShow) {
@@ -79,4 +115,5 @@ public class MovieSpecifications {
     public static Specification<Movie> hasLanguageId(Long[] languageIds) {
         return (root, query, criteriaBuilder) -> root.join("languages").get("id").in(languageIds);
     }
+
 }

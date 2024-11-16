@@ -35,6 +35,9 @@ public class User {
     @Column(name = "verify_flag")
     private boolean verifyFlag;
 
+    @Column(name = "is_active")
+    private boolean isActive;
+
     @Column(name = "deleted_flag")
     private Boolean deleteFlag;
 

@@ -9,19 +9,18 @@ import jsb.ep4api.payloads.responses.RequestResponse;
 import jsb.ep4api.payloads.responses.ReviewResponse;
 import jsb.ep4api.payloads.responses.SpecResponse;
 import jsb.ep4api.securities.service.UserDetailsImp;
-import jsb.ep4api.services.MovieService;
-import jsb.ep4api.services.ReviewReactionService;
-import jsb.ep4api.services.ReviewService;
-import jsb.ep4api.services.UserService;
+import jsb.ep4api.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,14 +38,23 @@ public class ReviewController {
     UserService userService;
     @Autowired
     MovieService movieService;
+    @Autowired
+    RatingService ratingService;
 
-    @GetMapping("/movie/{movieId}")
+    @GetMapping("/movie/{slug}")
     public ResponseEntity<?> getReviewsByMovieId(
             @RequestParam(required = false) Integer pageNo,
             @RequestParam(required = false) Integer pageSize,
-            @PathVariable Long movieId
+            @PathVariable String slug
     ) {
         try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            Long userId = null;
+            if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImp) {
+                UserDetailsImp userDetailsImp = (UserDetailsImp) authentication.getPrincipal();
+                userId = userDetailsImp.getId();
+            }
+
             if (pageNo == null) {
                 pageNo = 1;
             }
@@ -54,23 +62,40 @@ public class ReviewController {
                 pageSize = 10;
             }
 
-            Page<Review> reviews = reviewService.getReviewsByMovieId(pageNo, pageSize, movieId);
+            Movie movie = movieService.getMovieBySlug(slug);
+            if (movie == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RequestResponse(
+                        HttpStatus.NOT_FOUND.value(),
+                        MOVIE_NOT_FOUND_MESSAGE
+                ));
+            }
+
+            Page<Review> reviews = reviewService.getReviewsByMovieId(pageNo, pageSize, movie.getId());
             List<Review> reviewList = reviews.getContent();
             List<ReviewResponse> reviewResponses = new ArrayList<>();
 
             if (!reviewList.isEmpty()) {
                 for (Review review : reviewList) {
                     ReviewResponse reviewResponse = new ReviewResponse();
+                    int rating = ratingService.getRatingValueByUserIdAndMovieId(review.getUser().getId(), movie.getId());
+                    Long replyCount = reviewService.getReviewCountByParentId(review.getId());
                     reviewResponse.setId(review.getId());
                     reviewResponse.setTitle(review.getTitle());
                     reviewResponse.setContent(review.getContent());
-                    reviewResponse.setRating(review.getRating());
+                    reviewResponse.setRating(rating);
                     reviewResponse.setParentId(review.getParentId());
                     reviewResponse.setMovieId(review.getMovie().getId());
                     reviewResponse.setUserId(review.getUser().getId());
                     reviewResponse.setUserName(review.getUser().getFullName());
                     reviewResponse.setLikeCount(reviewReactionService.countReviewLikesByReviewId(review.getId()));
                     reviewResponse.setDislikeCount(reviewReactionService.countReviewDislikesByReviewId(review.getId()));
+                    if (userId != null) {
+                        Boolean userReaction = reviewReactionService.checkUserReaction(review.getId(), userId);
+                        System.out.println("userReaction: " + userReaction);
+                        reviewResponse.setUserReaction(reviewReactionService.checkUserReaction(review.getId(), userId));
+                    }
+                    reviewResponse.setCreatedAt(review.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                    reviewResponse.setReplyCount(replyCount);
                     reviewResponses.add(reviewResponse);
                 }
             }
@@ -108,6 +133,13 @@ public class ReviewController {
             @PathVariable Long parentId
     ) {
         try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            Long userId = null;
+            if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImp) {
+                UserDetailsImp userDetailsImp = (UserDetailsImp) authentication.getPrincipal();
+                userId = userDetailsImp.getId();
+            }
+
             if (pageNo == null) {
                 pageNo = 1;
             }
@@ -122,16 +154,24 @@ public class ReviewController {
             if (!reviewList.isEmpty()) {
                 for (Review review : reviewList) {
                     ReviewResponse reviewResponse = new ReviewResponse();
+                    Review parentReview = reviewService.getReviewById(review.getParentId());
+                    String replyTo = parentReview.getUser().getFullName();
                     reviewResponse.setId(review.getId());
                     reviewResponse.setTitle(review.getTitle());
                     reviewResponse.setContent(review.getContent());
-                    reviewResponse.setRating(review.getRating());
                     reviewResponse.setParentId(review.getParentId());
                     reviewResponse.setMovieId(review.getMovie().getId());
                     reviewResponse.setUserId(review.getUser().getId());
                     reviewResponse.setUserName(review.getUser().getFullName());
                     reviewResponse.setLikeCount(reviewReactionService.countReviewLikesByReviewId(review.getId()));
                     reviewResponse.setDislikeCount(reviewReactionService.countReviewDislikesByReviewId(review.getId()));
+                    if (userId != null) {
+                        Boolean userReaction = reviewReactionService.checkUserReaction(review.getId(), userId);
+                        System.out.println("userReaction: " + userReaction);
+                        reviewResponse.setUserReaction(reviewReactionService.checkUserReaction(review.getId(), userId));
+                    }
+                    reviewResponse.setCreatedAt(review.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                    reviewResponse.setReplyTo(replyTo);
                     reviewResponses.add(reviewResponse);
                 }
             }
@@ -192,7 +232,6 @@ public class ReviewController {
             Review review = new Review();
             review.setTitle(createReviewRequest.getTitle());
             review.setContent(createReviewRequest.getContent());
-            review.setRating(createReviewRequest.getRating());
             review.setParentId(createReviewRequest.getParentId());
             review.setMovie(movie);
             review.setUser(user);
@@ -246,7 +285,6 @@ public class ReviewController {
 
             review.setTitle(updateReviewRequest.getTitle());
             review.setContent(updateReviewRequest.getContent());
-            review.setRating(updateReviewRequest.getRating());
             review.setModifiedAt(CURRENT_TIME);
 
             reviewService.updateReview(review);

@@ -5,39 +5,31 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
-@Table(name = "reviews")
+@Table(name = "ratings")
 @Getter
 @Setter
-public class Review {
+public class Rating {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title")
-    private String title;
+    @Column(name = "value")
+    private Integer value;
 
-    @Column(name = "content")
-    private String content;
-
-    @Column(name = "parent_id")
-    private Long parentId;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "movie_id")
-    private Movie movie;
-
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "movie_id")
+    private Movie movie;
 
     @Column(name = "deleted_flag")
     private Boolean deleteFlag;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @Column(name = "modified_at")

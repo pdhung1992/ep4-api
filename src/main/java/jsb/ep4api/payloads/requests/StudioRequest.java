@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 public class StudioRequest {
-    @ValidId
+
     private Long id;
 
     @ValidFullName

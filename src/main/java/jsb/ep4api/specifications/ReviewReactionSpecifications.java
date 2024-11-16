@@ -13,12 +13,20 @@ public class ReviewReactionSpecifications {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("review").get("id"), reviewId);
     }
 
+    public static Specification<ReviewReaction> hasUserId(Long userId) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("user").get("id"), userId);
+    }
+
     public static Specification<ReviewReaction> hasLikeReaction() {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("reactionType"), REACTION_TYPE_LIKE);
     }
 
     public static Specification<ReviewReaction> hasDislikeReaction() {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("reactionType"), REACTION_TYPE_DISLIKE);
+    }
+
+    public static Specification<ReviewReaction> hasReaction(){
+        return (root, query, criteriaBuilder) -> criteriaBuilder.isNotNull(root.get("reactionType"));
     }
 
     public static Specification<ReviewReaction> hasNoDeletedFlag() {

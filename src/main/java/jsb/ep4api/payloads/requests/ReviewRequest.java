@@ -11,22 +11,18 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ReviewRequest {
-    @ValidEntityName
+
     private String title;
 
     @ValidDescription
     private String content;
 
-    @ValidRating
-    private int rating;
-
-    @ValidId
     private Long parentId;
 
     @ValidId
     private Long movieId;
 
-    @ValidId
+
     private Long userId;
 
     public ReviewRequest() {

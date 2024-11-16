@@ -2,6 +2,7 @@ package jsb.ep4api.controllers;
 
 import jakarta.validation.Valid;
 import jsb.ep4api.entities.*;
+import jsb.ep4api.entities.Package;
 import jsb.ep4api.payloads.requests.AdminRequest;
 import jsb.ep4api.payloads.requests.ResetPasswordRequest;
 import jsb.ep4api.payloads.requests.UserRequest;
@@ -57,10 +58,14 @@ public class AuthController {
     AdminResetPasswordTokenService adminResetPasswordTokenService;
     @Autowired
     UserResetPasswordTokenService userResetPasswordTokenService;
+    @Autowired
+    PackageService packageService;
+    @Autowired
+    private UserPackageService userPackageService;
 
 
     @PostMapping("/user/register")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody UserRequest registerRequest, BindingResult result) {
+    public ResponseEntity<?> registerUser(@RequestBody UserRequest registerRequest, BindingResult result) {
         try {
             if (result.hasErrors()) {
                 List<String> errorMessages = result.getAllErrors().stream()
@@ -89,9 +94,11 @@ public class AuthController {
             newUser.setCreatedAt(CURRENT_TIME);
             newUser.setModifiedAt(CURRENT_TIME);
             newUser.setVerifyFlag(DEFAULT_VERIFY_FLAG);
+            newUser.setActive(DEFAULT_IS_ACTIVE);
 
             userService.createUser(newUser);
 
+            //Send email to user
             String emailBody = String.format(REGISTER_SUCCESS_BODY, newUser.getFullName());
             emailService.sendMail(
                     newUser.getEmail(),
@@ -99,7 +106,22 @@ public class AuthController {
                     emailBody
             );
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(REGISTER_SUCCESS_MESSAGE);
+            //Add free package for user
+            Package freePackage = packageService.getPackageById(PACKAGE_DEFAULT_ID);
+            UserPackage userPackage = new UserPackage();
+            userPackage.setUser(newUser);
+            userPackage.setAPackage(freePackage);
+            userPackage.setExpiredAt(CURRENT_TIME.plusDays(freePackage.getExpirationUnit()));
+            userPackage.setDeleteFlag(DEFAULT_DELETE_FLAG);
+            userPackage.setCreatedAt(CURRENT_TIME);
+            userPackage.setModifiedAt(CURRENT_TIME);
+            userPackageService.createUserPackage(userPackage);
+
+            //Return response
+            return ResponseEntity.status(HttpStatus.CREATED).body(new RequestResponse(
+                    HttpStatus.CREATED.value(),
+                    REGISTER_SUCCESS_MESSAGE
+            ));
 
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(REGISTER_FAIL_MESSAGE + e.getMessage());
@@ -119,6 +141,7 @@ public class AuthController {
 
             UserJwtResponse userJwtResponse = new UserJwtResponse();
             userJwtResponse.setToken(jwt);
+            userJwtResponse.setId(userDetails.getId());
             userJwtResponse.setPhone(userDetails.getPhone());
             userJwtResponse.setEmail(userDetails.getEmail());
             userJwtResponse.setFullName(userDetails.getFullName());
@@ -130,12 +153,18 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/user/logout")
+    public ResponseEntity<?> logoutUser() {
+        SecurityContextHolder.clearContext();
+        return ResponseEntity.status(HttpStatus.OK).body(LOGOUT_SUCCESS_MESSAGE);
+    }
+
     @PostMapping("/user/forgot-password")
     public ResponseEntity<?> forgotUserPassword(@RequestBody ResetPasswordRequest resetRequest) {
         try {
             User user = userService.findByEmail(resetRequest.getEmail());
             if (user == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new UserResponse(
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RequestResponse(
                         HttpStatus.NOT_FOUND.value(),
                         ERROR_OCCURRED_MESSAGE
                 ));
@@ -144,7 +173,7 @@ public class AuthController {
             UserResetPasswordToken resetPasswordToken = userResetPasswordTokenService.getUserResetPasswordTokenByUserId(user.getId());
             if (resetPasswordToken != null) {
                 if (!resetPasswordToken.isUsed() && resetPasswordToken.getExpiredAt().isAfter(CURRENT_TIME)) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new UserResponse(
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RequestResponse(
                             HttpStatus.BAD_REQUEST.value(),
                             RESET_PASSWORD_TOKEN_ALREADY_SENT_MESSAGE
                     ));
@@ -164,12 +193,12 @@ public class AuthController {
                     emailBody
             );
 
-            return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(
+            return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(
                     HttpStatus.OK.value(),
                     RESET_PASSWORD_TOKEN_ALREADY_SENT_MESSAGE
             ));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new UserResponse(
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RequestResponse(
                     HttpStatus.BAD_REQUEST.value(),
                     ERROR_OCCURRED_MESSAGE
             ));
@@ -189,7 +218,7 @@ public class AuthController {
 
             UserResetPasswordToken resetPasswordToken = userResetPasswordTokenService.getUserResetPasswordTokenByToken(resetRequest.getToken());
             if (resetPasswordToken == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new UserResponse(
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RequestResponse(
                         HttpStatus.NOT_FOUND.value(),
                         ERROR_OCCURRED_MESSAGE
                 ));
@@ -207,12 +236,12 @@ public class AuthController {
 
             userResetPasswordTokenService.saveUserResetPasswordToken(resetPasswordToken);
 
-            return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(
+            return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(
                     HttpStatus.OK.value(),
                     UPDATE_PASSWORD_SUCCESS_MESSAGE
             ));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new UserResponse(
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RequestResponse(
                     HttpStatus.BAD_REQUEST.value(),
                     ERROR_OCCURRED_MESSAGE
             ));
@@ -244,7 +273,7 @@ public class AuthController {
 
             userService.updateUser(user);
 
-            return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(
+            return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(
                     HttpStatus.OK.value(),
                     UPDATE_PASSWORD_SUCCESS_MESSAGE
             ));
@@ -283,10 +312,9 @@ public class AuthController {
             }
             user.setModifiedAt(CURRENT_TIME);
             userService.updateUser(user);
-            return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(
+            return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(
                     HttpStatus.OK.value(),
-                    USER_UPDATED_MESSAGE,
-                    user.getAvatar()
+                    USER_UPDATED_MESSAGE
             ));
 
         } catch (Exception e) {
@@ -303,7 +331,7 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(USER_NOT_FOUND_MESSAGE);
             }
 
-            return ResponseEntity.status(HttpStatus.OK).body(new UserResponse(
+            return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(
                     HttpStatus.OK.value(),
                     user.getAvatar()
             ));

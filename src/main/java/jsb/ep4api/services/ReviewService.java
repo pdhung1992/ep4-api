@@ -55,6 +55,22 @@ public class ReviewService {
         return reviewRepository.findOne(spec).orElse(null);
     }
 
+    public Long getReviewCountByMovieId(Long movieId){
+        Specification<Review> spec = Specification.where(null);
+        spec = spec.and(ReviewSpecifications.hasMovieId(movieId));
+        spec = spec.and(ReviewSpecifications.hasNoDeletedFlag());
+
+        return reviewRepository.count(spec);
+    }
+
+    public Long getReviewCountByParentId(Long parentId){
+        Specification<Review> spec = Specification.where(null);
+        spec = spec.and(ReviewSpecifications.hasParentId(parentId));
+        spec = spec.and(ReviewSpecifications.hasNoDeletedFlag());
+
+        return reviewRepository.count(spec);
+    }
+
     public Double calculateRatingByMovieId(Long movieId){
         Specification<Review> spec = Specification.where(null);
         spec = spec.and(ReviewSpecifications.hasMovieId(movieId));

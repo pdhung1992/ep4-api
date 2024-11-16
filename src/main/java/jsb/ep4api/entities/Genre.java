@@ -21,6 +21,9 @@ public class Genre {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "image")
+    private String image;
+
     @Column(name = "slug")
     private String slug;
 

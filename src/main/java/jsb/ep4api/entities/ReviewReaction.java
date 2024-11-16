@@ -24,7 +24,7 @@ public class ReviewReaction {
     private User user;
 
     @Column(name = "reaction_type")
-    private boolean reactionType;
+    private Boolean reactionType;
 
     @Column(name = "deleted_flag")
     private Boolean deleteFlag;

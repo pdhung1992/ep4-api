@@ -47,6 +47,15 @@ public class MovieGenreService {
         return movieGenreRepository.findOne(spec).orElse(null);
     }
 
+    public List<Long> getMovieIdsByGenreId(Long genreId) {
+        Specification<MovieGenre> spec = Specification.where(null);
+        spec = spec.and(MovieGenreSpecifications.hasGenreId(genreId));
+        spec = spec.and(MovieGenreSpecifications.hasNoDeletedFlag());
+
+        List<MovieGenre> movieGenres = movieGenreRepository.findAll(spec);
+        return movieGenres.stream().map(movieGenre -> movieGenre.getMovie().getId()).toList();
+    }
+
     public void createMovieGenre(MovieGenre movieGenre) {
         movieGenreRepository.save(movieGenre);
     }

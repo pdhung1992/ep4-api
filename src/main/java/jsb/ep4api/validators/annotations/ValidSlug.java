@@ -12,4 +12,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = SlugValidator.class)
 public @interface ValidSlug {
+    String message() default "Invalid slug";
+    Class<?>[] groups() default {};
+    Class<?>[] payload() default {};
 }

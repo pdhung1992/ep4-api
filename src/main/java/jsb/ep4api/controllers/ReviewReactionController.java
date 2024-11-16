@@ -35,6 +35,7 @@ public class ReviewReactionController {
     @PostMapping("/click")
     public ResponseEntity<?> createReviewReaction(@RequestBody ReviewReactionRequest reviewReactionRequest){
         try {
+            // Get current user
             UserDetailsImp userDetailsImp = (UserDetailsImp) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User user = userService.getUserById(userDetailsImp.getId());
             if (user == null) {
@@ -44,6 +45,7 @@ public class ReviewReactionController {
                 ));
             }
 
+            // Get review
             Review review = reviewService.getReviewById(reviewReactionRequest.getReviewId());
             if (review == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RequestResponse(
@@ -52,8 +54,12 @@ public class ReviewReactionController {
                 ));
             }
 
-            ReviewReaction reviewReaction = reviewReactionService.getReviewReactionById(reviewReactionRequest.getReviewReactionId());
-            if (reviewReaction != null && reviewReaction.isReactionType() != reviewReactionRequest.isReactionType() && Objects.equals(reviewReaction.getUser().getId(), user.getId())) {
+            // Check if user has reacted to review
+            ReviewReaction reviewReaction = reviewReactionService.getReviewReactionByReviewIdAndUserId(review.getId(), user.getId());
+            if (reviewReaction != null &&
+                    !Objects.equals(reviewReaction.getReactionType(), reviewReactionRequest.isReactionType()) &&
+                    Objects.equals(reviewReaction.getUser().getId(), user.getId()))
+            {
                 reviewReaction.setReactionType(reviewReactionRequest.isReactionType());
                 reviewReaction.setModifiedAt(CURRENT_TIME);
 
@@ -63,10 +69,18 @@ public class ReviewReactionController {
                         HttpStatus.OK.value(),
                         UPDATE_REVIEW_REACTION_SUCCESS
                 ));
-            } else if (reviewReaction != null && reviewReaction.isReactionType() == reviewReactionRequest.isReactionType() && Objects.equals(reviewReaction.getUser().getId(), user.getId())){
+            } else if (reviewReaction != null &&
+                    Objects.equals(reviewReaction.getReactionType(), reviewReactionRequest.isReactionType()) &&
+                    Objects.equals(reviewReaction.getUser().getId(), user.getId()))
+            {
+                reviewReaction.setReactionType(REACTION_TYPE_NONE);
+                reviewReaction.setModifiedAt(CURRENT_TIME);
+
+                reviewReactionService.createReviewReaction(reviewReaction);
+
                 return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(
                         HttpStatus.OK.value(),
-                        UPDATE_REVIEW_REACTION_FAIL
+                        UPDATE_REVIEW_REACTION_SUCCESS
                 ));
             } else {
                 ReviewReaction newReviewReaction = new ReviewReaction();
@@ -88,4 +102,6 @@ public class ReviewReactionController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
 }

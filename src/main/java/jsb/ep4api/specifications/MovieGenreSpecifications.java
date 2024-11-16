@@ -1,5 +1,6 @@
 package jsb.ep4api.specifications;
 
+import jsb.ep4api.entities.Movie;
 import jsb.ep4api.entities.MovieGenre;
 import org.springframework.data.jpa.domain.Specification;
 

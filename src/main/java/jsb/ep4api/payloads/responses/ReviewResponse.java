@@ -3,6 +3,9 @@ package jsb.ep4api.payloads.responses;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 @Getter
 @Setter
 public class ReviewResponse {
@@ -16,6 +19,10 @@ public class ReviewResponse {
     private String userName;
     private Long likeCount;
     private Long dislikeCount;
+    private Long replyCount;
+    private String replyTo;
+    private Boolean userReaction;
+    private String createdAt;
 
     public ReviewResponse() {
     }

@@ -8,6 +8,10 @@ public class GenreSpecifications {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("id"), id);
     }
 
+    public static Specification<Genre> hasSlug(String slug) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("slug"), slug);
+    }
+
     public static Specification<Genre> hasName(String name) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("name"), name);
     }

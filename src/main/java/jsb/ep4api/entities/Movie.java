@@ -44,6 +44,9 @@ public class Movie {
     @Column(name = "poster")
     private String poster;
 
+    @Column(name = "image")
+    private String image;
+
     @Column(name = "trailer")
     private String trailer;
 

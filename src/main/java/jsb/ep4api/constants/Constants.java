@@ -18,6 +18,7 @@ public class Constants {
     public static final boolean DEFAULT_VERIFY_FLAG = false;
     public static final boolean DEFAULT_SHOW_FLAG = true;
     public static final boolean DEFAULT_IS_USED = false;
+    public static final boolean DEFAULT_IS_ACTIVE = true;
 
     public static final int DEFAULT_PAGE_NUMBER = 0;
     public static final int DEFAULT_PAGE_SIZE = 10;
@@ -41,9 +42,10 @@ public class Constants {
     public static final String DEFAULT_BANNER = "default_banner.png";
     public static final String DEFAULT_LOGO = "default_logo.png";
     public static final String DEFAULT_THUMBNAIL = "default_thumbnail.png";
+    public static final String DEFAULT_IMAGE = "default_image.png";
 
     public static final String DEFAULT_ADMIN_URL = "http://localhost:1234";
-    public static final String DEFAULT_USER_URL = "http://localhost:2345";
+    public static final String DEFAULT_USER_URL = "http://localhost:5678";
 
     public static final String DEFAULT_UPLOAD_IMAGE_DIR = "public/images";
     public static final String DEFAULT_UPLOAD_VIDEO_DIR = "public/media";
@@ -85,6 +87,10 @@ public class Constants {
     public static final String USER_NOT_FOUND_MESSAGE = "User not found!";
     public static final String USER_UPDATED_MESSAGE = "User updated successfully!";
     public static final String USER_UPDATE_FAIL_MESSAGE = "Update failed! Error: ";
+    public static final String USER_BLOCKED_MESSAGE = "User blocked successfully!";
+    public static final String USER_BLOCK_FAIL_MESSAGE = "Block failed! Error: ";
+    public static final String USER_UNBLOCKED_MESSAGE = "User unblocked successfully!";
+    public static final String USER_UNBLOCK_FAIL_MESSAGE = "Unblock failed! Error: ";
 
     public static final String USER_DELETED_MESSAGE = "User deleted successfully!";
     public static final String USER_DELETE_FAIL_MESSAGE = "Delete failed! Error: ";
@@ -131,6 +137,7 @@ public class Constants {
     public static final String DELETE_PACKAGE_SUCCESS_MESSAGE = "Package deleted successfully!";
     public static final String DELETE_PACKAGE_FAIL_MESSAGE = "Delete failed! Error: ";
     public static final String PACKAGE_NOT_FOUND_MESSAGE = "Package not found!";
+    public static final long PACKAGE_DEFAULT_ID = 5;
 
     public static final String CREATE_CLASSIFICATION_SUCCESS_MESSAGE = "Classification created successfully!";
     public static final String CREATE_CLASSIFICATION_FAIL_MESSAGE = "Create failed! Error: ";
@@ -238,6 +245,9 @@ public class Constants {
     public static final String REVIEW_REACTION_NOT_FOUND = "Review reaction not found!";
     public static final boolean REACTION_TYPE_LIKE = true;
     public static final boolean REACTION_TYPE_DISLIKE = false;
+    public static final Boolean REACTION_TYPE_NONE = null;
+
+    public static final String RATING_SUBMIT_SUCCESS_MESSAGE = "Rating submitted successfully!";
 
     //Email
     public static final String REGISTER_SUCCESS_SUBJECT = "MovieX - Register Success Confirmation";
@@ -286,7 +296,7 @@ public class Constants {
     public static final String VN_PAY_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
     public static final String VN_PAY_TMN_CODE = "7X7BO2T6";
     public static final String VN_PAY_HASH_SECRET = "MTWMTCP6NKI48PLU0DE30591RD1NDMPT";
-    public static final String VN_PAY_RETURN_URL = "http://localhost:3000/loading";
+    public static final String VN_PAY_RETURN_URL = "http://localhost:5678/payment-loading";
     public static final String VN_PAY_API_URL = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
     public static final String VN_PAY_VERSION = "2.1.0";
     public static final String VN_PAY_COMMAND = "pay";
