@@ -5,13 +5,17 @@ import jsb.ep4api.entities.User;
 import jsb.ep4api.payloads.responses.RequestResponse;
 import jsb.ep4api.payloads.responses.SpecResponse;
 import jsb.ep4api.payloads.responses.UserResponse;
+import jsb.ep4api.securities.service.UserDetailsImp;
 import jsb.ep4api.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -108,7 +112,7 @@ public class UserController {
                 ));
             }
             user.setActive(false);
-            user.setModifiedAt(CURRENT_TIME);
+            user.setModifiedAt(LocalDateTime.now());
             userService.updateUser(user);
 
             return ResponseEntity.ok(new RequestResponse(
@@ -134,13 +138,45 @@ public class UserController {
                 ));
             }
             user.setActive(true);
-            user.setModifiedAt(CURRENT_TIME);
+            user.setModifiedAt(LocalDateTime.now());
             userService.updateUser(user);
 
             return ResponseEntity.ok(new RequestResponse(
                 HttpStatus.OK.value(),
                 USER_UNBLOCKED_MESSAGE
             ));
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("user/info")
+    public ResponseEntity<?> getUserInfo() {
+        try {
+            UserDetailsImp userDetails = (UserDetailsImp) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            Long userId = userDetails.getId();
+
+            User user = userService.getUserById(userId);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RequestResponse(
+                    HttpStatus.NOT_FOUND.value(),
+                    USER_NOT_FOUND_MESSAGE
+                ));
+            }
+
+            UserResponse userResponse = new UserResponse();
+            userResponse.setId(user.getId());
+            userResponse.setFullName(user.getFullName());
+            userResponse.setPhone(user.getPhone());
+            userResponse.setEmail(user.getEmail());
+            userResponse.setIsActive(user.isActive());
+            LocalDateTime joinDate = user.getCreatedAt();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy MMM dd");
+            String formattedDate = joinDate.format(formatter);
+
+            userResponse.setJoinDate(formattedDate);
+
+            return ResponseEntity.ok(userResponse);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

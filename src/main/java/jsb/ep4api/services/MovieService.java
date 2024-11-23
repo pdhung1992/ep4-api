@@ -18,6 +18,12 @@ public class MovieService {
     @Autowired
     private MovieRepository movieRepository;
 
+    public List<Movie> getAllMovies() {
+        Specification<Movie> spec = Specification.where(null);
+        spec = spec.and(MovieSpecifications.hasNoDeletedFlag());
+        return movieRepository.findAll(spec);
+    }
+
     public Page<Movie> getMovies(
             int pageNo,
             int pageSize,
@@ -95,12 +101,21 @@ public class MovieService {
         return movieRepository.findAll(spec, pageable).getContent();
     }
 
-    public List<Movie> get10MoviesBestByGenreId(List<Long> genreId) {
+    public List<Movie> get10MoviesBestByGenreId(List<Long> genreIds) {
         Specification<Movie> spec = Specification.where(null);
-        spec = spec.and(MovieSpecifications.hasIdIn(genreId));
+        spec = spec.and(MovieSpecifications.hasIdIn(genreIds));
         spec = spec.and(MovieSpecifications.hasNoDeletedFlag());
         spec = spec.and(MovieSpecifications.orderByViews());
         Pageable pageable = PageRequest.of(0, 10);
+        return movieRepository.findAll(spec, pageable).getContent();
+    }
+
+    public List<Movie> getMoviesByGenreId(int pageNo, int pageSize, List<Long> genreIds) {
+        Specification<Movie> spec = Specification.where(null);
+        spec = spec.and(MovieSpecifications.hasIdIn(genreIds));
+        spec = spec.and(MovieSpecifications.hasNoDeletedFlag());
+        spec = spec.and(MovieSpecifications.orderByCreatedAtDesc());
+        Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
         return movieRepository.findAll(spec, pageable).getContent();
     }
 
@@ -125,6 +140,29 @@ public class MovieService {
         spec = spec.and(MovieSpecifications.hasNoDeletedFlag());
 
         return movieRepository.findOne(spec).isPresent();
+    }
+
+    public List<Movie> searchMovieByTitle(int pageNo, int pageSize, String title) {
+        Specification<Movie> spec = Specification.where(null);
+        spec = spec.and(MovieSpecifications.titleContains(title));
+        spec = spec.or(MovieSpecifications.originalTitleContains(title));
+        spec = spec.and(MovieSpecifications.hasNoDeletedFlag());
+        spec = spec.and(MovieSpecifications.orderByCreatedAtDesc());
+        Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
+        return movieRepository.findAll(spec, pageable).getContent();
+    }
+
+    public long totalViewOfAllMovies() {
+        Specification<Movie> spec = Specification.where(null);
+        spec = spec.and(MovieSpecifications.hasNoDeletedFlag());
+
+        long totalView = 0;
+        List<Movie> movies = movieRepository.findAll(spec);
+        for (Movie movie : movies) {
+            totalView += movie.getViews();
+        }
+
+        return totalView;
     }
 
     public void createMovie(Movie movie) {

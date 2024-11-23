@@ -8,10 +8,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ReviewReactionRequest {
-    @ValidId
+
     private Long reviewId;
 
-    @ValidId
+
     private Long userId;
 
     @NotNull

@@ -11,6 +11,7 @@ public class GenreResponse {
     private String description;
     private String slug;
     private String image;
+    private int totalMovies;
 
     public GenreResponse() {
     }

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import static jsb.ep4api.constants.Constants.*;
@@ -61,7 +62,7 @@ public class ReviewReactionController {
                     Objects.equals(reviewReaction.getUser().getId(), user.getId()))
             {
                 reviewReaction.setReactionType(reviewReactionRequest.isReactionType());
-                reviewReaction.setModifiedAt(CURRENT_TIME);
+                reviewReaction.setModifiedAt(LocalDateTime.now());
 
                 reviewReactionService.createReviewReaction(reviewReaction);
 
@@ -74,7 +75,7 @@ public class ReviewReactionController {
                     Objects.equals(reviewReaction.getUser().getId(), user.getId()))
             {
                 reviewReaction.setReactionType(REACTION_TYPE_NONE);
-                reviewReaction.setModifiedAt(CURRENT_TIME);
+                reviewReaction.setModifiedAt(LocalDateTime.now());
 
                 reviewReactionService.createReviewReaction(reviewReaction);
 
@@ -88,8 +89,8 @@ public class ReviewReactionController {
                 newReviewReaction.setUser(user);
                 newReviewReaction.setReactionType(reviewReactionRequest.isReactionType());
                 newReviewReaction.setDeleteFlag(DEFAULT_DELETE_FLAG);
-                newReviewReaction.setCreatedAt(CURRENT_TIME);
-                newReviewReaction.setModifiedAt(CURRENT_TIME);
+                newReviewReaction.setCreatedAt(LocalDateTime.now());
+                newReviewReaction.setModifiedAt(LocalDateTime.now());
 
                 reviewReactionService.createReviewReaction(newReviewReaction);
 

@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jsb.ep4api.entities.*;
 import jsb.ep4api.entities.Package;
 import jsb.ep4api.payloads.requests.AdminRequest;
+import jsb.ep4api.payloads.requests.ChangePasswordRequest;
 import jsb.ep4api.payloads.requests.ResetPasswordRequest;
 import jsb.ep4api.payloads.requests.UserRequest;
 import jsb.ep4api.payloads.responses.*;
@@ -29,6 +30,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -91,8 +93,8 @@ public class AuthController {
             newUser.setPassword(encodedPassword);
             newUser.setAvatar(DEFAULT_AVATAR);
             newUser.setDeleteFlag(DEFAULT_DELETE_FLAG);
-            newUser.setCreatedAt(CURRENT_TIME);
-            newUser.setModifiedAt(CURRENT_TIME);
+            newUser.setCreatedAt(LocalDateTime.now());
+            newUser.setModifiedAt(LocalDateTime.now());
             newUser.setVerifyFlag(DEFAULT_VERIFY_FLAG);
             newUser.setActive(DEFAULT_IS_ACTIVE);
 
@@ -111,10 +113,10 @@ public class AuthController {
             UserPackage userPackage = new UserPackage();
             userPackage.setUser(newUser);
             userPackage.setAPackage(freePackage);
-            userPackage.setExpiredAt(CURRENT_TIME.plusDays(freePackage.getExpirationUnit()));
+            userPackage.setExpiredAt(LocalDateTime.now().plusDays(freePackage.getExpirationUnit()));
             userPackage.setDeleteFlag(DEFAULT_DELETE_FLAG);
-            userPackage.setCreatedAt(CURRENT_TIME);
-            userPackage.setModifiedAt(CURRENT_TIME);
+            userPackage.setCreatedAt(LocalDateTime.now());
+            userPackage.setModifiedAt(LocalDateTime.now());
             userPackageService.createUserPackage(userPackage);
 
             //Return response
@@ -172,7 +174,7 @@ public class AuthController {
 
             UserResetPasswordToken resetPasswordToken = userResetPasswordTokenService.getUserResetPasswordTokenByUserId(user.getId());
             if (resetPasswordToken != null) {
-                if (!resetPasswordToken.isUsed() && resetPasswordToken.getExpiredAt().isAfter(CURRENT_TIME)) {
+                if (!resetPasswordToken.isUsed() && resetPasswordToken.getExpiredAt().isAfter(LocalDateTime.now())) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RequestResponse(
                             HttpStatus.BAD_REQUEST.value(),
                             RESET_PASSWORD_TOKEN_ALREADY_SENT_MESSAGE
@@ -226,13 +228,13 @@ public class AuthController {
 
             User user = resetPasswordToken.getUser();
             user.setPassword(encoder.encode(resetRequest.getNewPassword()));
-            user.setModifiedAt(CURRENT_TIME);
+            user.setModifiedAt(LocalDateTime.now());
 
             userService.updateUser(user);
 
             resetPasswordToken.setUsed(true);
             resetPasswordToken.setDeleteFlag(true);
-            resetPasswordToken.setModifiedAt(CURRENT_TIME);
+            resetPasswordToken.setModifiedAt(LocalDateTime.now());
 
             userResetPasswordTokenService.saveUserResetPasswordToken(resetPasswordToken);
 
@@ -249,7 +251,7 @@ public class AuthController {
     }
 
     @PostMapping("/user/change-password")
-    public ResponseEntity<?> changePassword(@Valid @RequestBody UserRequest changeRequest, BindingResult result) {
+    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest changeRequest, BindingResult result) {
         try {
             if (result.hasErrors()) {
                 List<String> errorMessages = result.getAllErrors().stream()
@@ -260,6 +262,7 @@ public class AuthController {
 
             UserDetailsImp userDetails = (UserDetailsImp) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User user = userService.findById(userDetails.getId());
+            System.out.printf("user: %s\n", user.getFullName());
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(USER_NOT_FOUND_MESSAGE);
             }
@@ -269,7 +272,7 @@ public class AuthController {
             }
 
             user.setPassword(encoder.encode(changeRequest.getNewPassword()));
-            user.setModifiedAt(CURRENT_TIME);
+            user.setModifiedAt(LocalDateTime.now());
 
             userService.updateUser(user);
 
@@ -310,7 +313,7 @@ public class AuthController {
                 Files.copy(avatar.getInputStream(), Paths.get(thumbnailPath), StandardCopyOption.REPLACE_EXISTING);
                 user.setAvatar(avatarUniqFilename);
             }
-            user.setModifiedAt(CURRENT_TIME);
+            user.setModifiedAt(LocalDateTime.now());
             userService.updateUser(user);
             return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(
                     HttpStatus.OK.value(),
@@ -424,7 +427,7 @@ public class AuthController {
 
             AdminResetPasswordToken resetPasswordToken = adminResetPasswordTokenService.getAdminResetPasswordTokenByAdminId(admin.getId());
             if (resetPasswordToken != null){
-                if (!resetPasswordToken.isUsed() && resetPasswordToken.getExpiredAt().isAfter(CURRENT_TIME)){
+                if (!resetPasswordToken.isUsed() && resetPasswordToken.getExpiredAt().isAfter(LocalDateTime.now())){
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RequestResponse(
                             HttpStatus.BAD_REQUEST.value(),
                             RESET_PASSWORD_TOKEN_ALREADY_SENT_MESSAGE
@@ -477,13 +480,13 @@ public class AuthController {
 
             Admin admin = resetPasswordToken.getAdmin();
             admin.setPassword(encoder.encode(resetRequest.getNewPassword()));
-            admin.setModifiedAt(CURRENT_TIME);
+            admin.setModifiedAt(LocalDateTime.now());
 
             adminService.updateAdmin(admin);
 
             resetPasswordToken.setUsed(true);
             resetPasswordToken.setDeleteFlag(true);
-            resetPasswordToken.setModifiedAt(CURRENT_TIME);
+            resetPasswordToken.setModifiedAt(LocalDateTime.now());
 
             adminResetPasswordTokenService.saveAdminResetPasswordToken(resetPasswordToken);
 
@@ -520,7 +523,7 @@ public class AuthController {
             }
 
             admin.setPassword(encoder.encode(changeRequest.getNewPassword()));
-            admin.setModifiedAt(CURRENT_TIME);
+            admin.setModifiedAt(LocalDateTime.now());
 
             adminService.updateAdmin(admin);
 
@@ -561,7 +564,7 @@ public class AuthController {
                 Files.copy(avatar.getInputStream(), Paths.get(thumbnailPath), StandardCopyOption.REPLACE_EXISTING);
                 admin.setAvatar(avatarUniqFilename);
             }
-            admin.setModifiedAt(CURRENT_TIME);
+            admin.setModifiedAt(LocalDateTime.now());
 
             adminService.updateAdmin(admin);
             return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(

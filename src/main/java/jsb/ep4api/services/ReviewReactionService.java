@@ -38,9 +38,10 @@ public class ReviewReactionService {
         spec = spec.and(ReviewReactionSpecifications.hasUserId(userId));
         spec = spec.and(ReviewReactionSpecifications.hasNoDeletedFlag());
 
-        return reviewReactionRepository.findOne(spec)
-                .map(ReviewReaction::getReactionType)
-                .orElse(null);
+        ReviewReaction reviewReaction = reviewReactionRepository.findOne(spec).orElse(null);
+
+        assert reviewReaction != null;
+        return reviewReaction.getReactionType();
     }
 
     public ReviewReaction getReviewReactionByReviewIdAndUserId(Long reviewId, Long userId){

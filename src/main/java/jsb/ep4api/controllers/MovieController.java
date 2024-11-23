@@ -15,6 +15,7 @@ import jsb.ep4api.payloads.responses.*;
 import jsb.ep4api.securities.service.AdminDetailsImp;
 import jsb.ep4api.securities.service.UserDetailsImp;
 import jsb.ep4api.services.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -31,12 +32,16 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static jsb.ep4api.constants.Constants.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/movies")
 public class MovieController {
@@ -365,6 +370,63 @@ public class MovieController {
         }
     }
 
+    @GetMapping("/client/genre/{slug}/{pageNo}")
+    public ResponseEntity<?> getAllMoviesByGenre(
+            @PathVariable String slug,
+            @PathVariable(required = false) Integer pageNo
+    ){
+        try {
+            if (pageNo == null) {
+                pageNo = 1;
+            }
+
+            int pageSize = 10;
+
+            Genre genre = genreService.getGenreBySlug(slug);
+            if (genre == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(GENRE_NOT_FOUND_MESSAGE);
+            }
+
+            List<Long> movieIds = movieGenreService.getMovieIdsByGenreId(genre.getId());
+            List<Movie> movies = movieService.getMoviesByGenreId(pageNo, pageSize, movieIds);
+            List<MovieResponse> movieResponses = new ArrayList<>();
+            for (Movie movie : movies) {
+                MovieResponse movieResponse = new MovieResponse();
+                movieResponse.setId(movie.getId());
+                movieResponse.setSlug(movie.getSlug());
+                movieResponse.setTitle(movie.getTitle());
+                movieResponse.setOriginalTitle(movie.getOriginalTitle());
+                movieResponse.setDuration(movie.getDuration());
+                movieResponse.setReleaseYear(movie.getReleaseYear());
+                movieResponse.setPoster(movie.getPoster());
+                movieResponse.setImage(movie.getImage());
+                movieResponse.setClassification(movie.getClassification().getCode());
+                movieResponse.setVideoMode(movie.getVideoMode().getCode());
+                List<MovieGenre> movieGenres = movieGenreService.getMovieGenresByMovieId(movie.getId());
+                List<GenreResponse> genres = new ArrayList<>();
+                for (MovieGenre movieGenre : movieGenres) {
+                    GenreResponse genreResponse = new GenreResponse();
+                    genreResponse.setId(movieGenre.getGenre().getId());
+                    genreResponse.setName(movieGenre.getGenre().getName());
+                    genreResponse.setSlug(movieGenre.getGenre().getSlug());
+                    genres.add(genreResponse);
+                }
+                movieResponse.setGenres(genres);
+                Double rating = ratingService.getAverageRatingByMovieId(movie.getId());
+                Long ratingCount = ratingService.getRatingCountByMovieId(movie.getId());
+                movieResponse.setRating(rating);
+                movieResponse.setRatingCount(ratingCount);
+                movieResponse.setViews(movie.getViews());
+
+                movieResponses.add(movieResponse);
+            }
+
+            return ResponseEntity.ok(movieResponses);
+        }catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @GetMapping("/client/genre/best/{slug}")
     public ResponseEntity<?> get10BestMoviesByGenres(@PathVariable String slug) {
         try {
@@ -374,7 +436,6 @@ public class MovieController {
             }
             List<Long> movieIds = movieGenreService.getMovieIdsByGenreId(genre.getId());
             List<Movie> movies = movieService.get10MoviesBestByGenreId(movieIds);
-            System.out.printf("Movies: %s\n", movies);
             List<MovieResponse> movieResponses = new ArrayList<>();
             for (Movie movie : movies) {
                 MovieResponse movieResponse = new MovieResponse();
@@ -591,6 +652,73 @@ public class MovieController {
         }
     }
 
+    @GetMapping("/client/search/{keyword}/{pageNo}")
+    public ResponseEntity<?> searchMovies(
+            @PathVariable String keyword,
+            @PathVariable(required = false) Integer pageNo
+    ) {
+        try {
+            if (pageNo == null) {
+                pageNo = 1;
+            }
+            int pageSize = 10;
+
+            List<Movie> movies = movieService.searchMovieByTitle(pageNo, pageSize, keyword);
+            List<MovieResponse> movieResponses = new ArrayList<>();
+            for (Movie movie : movies) {
+                MovieResponse movieResponse = new MovieResponse();
+                movieResponse.setId(movie.getId());
+                movieResponse.setSlug(movie.getSlug());
+                movieResponse.setTitle(movie.getTitle());
+                movieResponse.setOriginalTitle(movie.getOriginalTitle());
+                movieResponse.setDuration(movie.getDuration());
+                movieResponse.setReleaseYear(movie.getReleaseYear());
+                movieResponse.setPoster(movie.getPoster());
+                movieResponse.setImage(movie.getImage());
+                movieResponse.setClassification(movie.getClassification().getCode());
+                movieResponse.setVideoMode(movie.getVideoMode().getCode());
+                List<MovieGenre> movieGenres = movieGenreService.getMovieGenresByMovieId(movie.getId());
+                List<GenreResponse> genres = new ArrayList<>();
+                for (MovieGenre movieGenre : movieGenres) {
+                    GenreResponse genreResponse = new GenreResponse();
+                    genreResponse.setId(movieGenre.getGenre().getId());
+                    genreResponse.setName(movieGenre.getGenre().getName());
+                    genreResponse.setSlug(movieGenre.getGenre().getSlug());
+                    genres.add(genreResponse);
+                }
+                movieResponse.setGenres(genres);
+                Double rating = ratingService.getAverageRatingByMovieId(movie.getId());
+                Long ratingCount = ratingService.getRatingCountByMovieId(movie.getId());
+                movieResponse.setRating(rating);
+                movieResponse.setRatingCount(ratingCount);
+                movieResponse.setViews(movie.getViews());
+
+                movieResponses.add(movieResponse);
+            }
+
+            return ResponseEntity.ok(movieResponses);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/client/search/related-keys/{keyword}")
+    public ResponseEntity<?> getRelatedKeywords(
+            @PathVariable String keyword
+    ) {
+        try {
+            List<Movie> relatedMovieByKeyword = movieService.searchMovieByTitle(1, 10, keyword);
+            List<String> relatedKeywords = new ArrayList<>();
+            for (Movie movie : relatedMovieByKeyword) {
+                relatedKeywords.add(movie.getTitle());
+            }
+
+            return ResponseEntity.ok(relatedKeywords);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @PostMapping( "/create")
     @HasFunctionAccessToFunction(MOVIE_MANAGEMENT_FUNCTION)
     public ResponseEntity<?> createMovie(
@@ -730,8 +858,8 @@ public class MovieController {
             newMovie.setShow(isShow);
             newMovie.setShowAtHome(isShowAtHome);
             newMovie.setDeleteFlag(DEFAULT_DELETE_FLAG);
-            newMovie.setCreatedAt(CURRENT_TIME);
-            newMovie.setModifiedAt(CURRENT_TIME);
+            newMovie.setCreatedAt(LocalDateTime.now());
+            newMovie.setModifiedAt(LocalDateTime.now());
 
             movieService.createMovie(newMovie);
 
@@ -748,8 +876,8 @@ public class MovieController {
                 movieGenre.setMovie(newMovie);
                 movieGenre.setGenre(genre);
                 movieGenre.setDeleteFlag(DEFAULT_DELETE_FLAG);
-                movieGenre.setCreatedAt(CURRENT_TIME);
-                movieGenre.setModifiedAt(CURRENT_TIME);
+                movieGenre.setCreatedAt(LocalDateTime.now());
+                movieGenre.setModifiedAt(LocalDateTime.now());
 
                 movieGenreService.createMovieGenre(movieGenre);
             }
@@ -765,8 +893,8 @@ public class MovieController {
                 movieLanguage.setMovie(newMovie);
                 movieLanguage.setLanguage(language);
                 movieLanguage.setDeleteFlag(DEFAULT_DELETE_FLAG);
-                movieLanguage.setCreatedAt(CURRENT_TIME);
-                movieLanguage.setModifiedAt(CURRENT_TIME);
+                movieLanguage.setCreatedAt(LocalDateTime.now());
+                movieLanguage.setModifiedAt(LocalDateTime.now());
 
                 movieLanguageService.createMovieLanguage(movieLanguage);
             }
@@ -821,8 +949,8 @@ public class MovieController {
                 movieFile.setTitle(movieFileRequest.getTitle());
                 movieFile.setMovie(newMovie);
                 movieFile.setDeleteFlag(DEFAULT_DELETE_FLAG);
-                movieFile.setCreatedAt(CURRENT_TIME);
-                movieFile.setModifiedAt(CURRENT_TIME);
+                movieFile.setCreatedAt(LocalDateTime.now());
+                movieFile.setModifiedAt(LocalDateTime.now());
 
                 movieFileService.createMovieFile(movieFile);
             }
@@ -836,8 +964,8 @@ public class MovieController {
                 cast.setCharacterName(castRequest.getCharacterName());
                 cast.setMain(castRequest.isMain());
                 cast.setDeleteFlag(DEFAULT_DELETE_FLAG);
-                cast.setCreatedAt(CURRENT_TIME);
-                cast.setModifiedAt(CURRENT_TIME);
+                cast.setCreatedAt(LocalDateTime.now());
+                cast.setModifiedAt(LocalDateTime.now());
 
                 castService.createCast(cast);
             }
@@ -857,8 +985,8 @@ public class MovieController {
 
                 crewMember.setMovie(newMovie);
                 crewMember.setDeleteFlag(DEFAULT_DELETE_FLAG);
-                crewMember.setCreatedAt(CURRENT_TIME);
-                crewMember.setModifiedAt(CURRENT_TIME);
+                crewMember.setCreatedAt(LocalDateTime.now());
+                crewMember.setModifiedAt(LocalDateTime.now());
 
                 crewMemberService.createCrewMember(crewMember);
             }
@@ -1021,7 +1149,7 @@ public class MovieController {
                 updateMovie.setShowAtHome(isShowAtHome);
             }
 
-            updateMovie.setModifiedAt(CURRENT_TIME);
+            updateMovie.setModifiedAt(LocalDateTime.now());
 
             movieService.updateMovie(updateMovie);
 
@@ -1041,13 +1169,13 @@ public class MovieController {
                         movieGenre.setMovie(updateMovie);
                         movieGenre.setGenre(genre);
                         movieGenre.setDeleteFlag(DEFAULT_DELETE_FLAG);
-                        movieGenre.setCreatedAt(CURRENT_TIME);
-                        movieGenre.setModifiedAt(CURRENT_TIME);
+                        movieGenre.setCreatedAt(LocalDateTime.now());
+                        movieGenre.setModifiedAt(LocalDateTime.now());
 
                         movieGenreService.createMovieGenre(movieGenre);
                     } else {
                         movieGenre.setDeleteFlag(DEFAULT_DELETE_FLAG);
-                        movieGenre.setModifiedAt(CURRENT_TIME);
+                        movieGenre.setModifiedAt(LocalDateTime.now());
                         movieGenreService.deleteMovieGenre(movieGenre);
                     }
                 }
@@ -1067,13 +1195,13 @@ public class MovieController {
                         movieLanguage.setMovie(updateMovie);
                         movieLanguage.setLanguage(language);
                         movieLanguage.setDeleteFlag(DEFAULT_DELETE_FLAG);
-                        movieLanguage.setCreatedAt(CURRENT_TIME);
-                        movieLanguage.setModifiedAt(CURRENT_TIME);
+                        movieLanguage.setCreatedAt(LocalDateTime.now());
+                        movieLanguage.setModifiedAt(LocalDateTime.now());
 
                         movieLanguageService.createMovieLanguage(movieLanguage);
                     } else {
                         movieLanguage.setDeleteFlag(DEFAULT_DELETE_FLAG);
-                        movieLanguage.setModifiedAt(CURRENT_TIME);
+                        movieLanguage.setModifiedAt(LocalDateTime.now());
                         movieLanguageService.deleteMovieLanguage(movieLanguage);
                     }
                 }
@@ -1119,7 +1247,7 @@ public class MovieController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MOVIE_NOT_FOUND_MESSAGE);
             }
             updateMovie.setShow(isShow);
-            updateMovie.setModifiedAt(CURRENT_TIME);
+            updateMovie.setModifiedAt(LocalDateTime.now());
 
             movieService.updateMovie(updateMovie);
 
@@ -1144,7 +1272,7 @@ public class MovieController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MOVIE_NOT_FOUND_MESSAGE);
             }
             updateMovie.setShowAtHome(isShowAtHome);
-            updateMovie.setModifiedAt(CURRENT_TIME);
+            updateMovie.setModifiedAt(LocalDateTime.now());
 
             movieService.updateMovie(updateMovie);
 
@@ -1165,7 +1293,7 @@ public class MovieController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MOVIE_NOT_FOUND_MESSAGE);
             }
             updateMovie.setViews(updateMovie.getViews() + 1);
-            updateMovie.setModifiedAt(CURRENT_TIME);
+            updateMovie.setModifiedAt(LocalDateTime.now());
 
             movieService.updateMovie(updateMovie);
 
@@ -1187,7 +1315,7 @@ public class MovieController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MOVIE_NOT_FOUND_MESSAGE);
             }
             deleteMovie.setDeleteFlag(true);
-            deleteMovie.setModifiedAt(CURRENT_TIME);
+            deleteMovie.setModifiedAt(LocalDateTime.now());
 
             movieService.updateMovie(deleteMovie);
 

@@ -8,8 +8,15 @@ import jsb.ep4api.payloads.requests.TransactionRequest;
 import jsb.ep4api.repositories.TransactionRepository;
 import jsb.ep4api.specifications.TransactionSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 import static jsb.ep4api.constants.Constants.*;
 
@@ -24,11 +31,83 @@ public class TransactionService {
     @Autowired
     private MovieService movieService;
 
+    public Page<Transaction> getTransactionsByUser(Long userId, Integer pageNo, Integer pageSize, String sortField, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ?
+                Sort.by(sortField).ascending() :
+                Sort.by(sortField).descending();
+        Pageable pageable = PageRequest.of(pageNo - 1, pageSize, sort);
+
+        Specification<Transaction> spec = Specification.where(null);
+        spec = spec.and(TransactionSpecifications.hasUserId(userId));
+        spec = spec.and(TransactionSpecifications.hasNoDeleteFlag());
+
+        return transactionRepository.findAll(spec, pageable);
+    }
+
     public Transaction findByCode(String code) {
         Specification<Transaction> spec = Specification.where(null);
         spec = spec.and(TransactionSpecifications.hasCode(code));
         spec = spec.and(TransactionSpecifications.hasNoDeleteFlag());
         return transactionRepository.findOne(spec).orElse(null);
+    }
+
+    public Page<Transaction> getTransactionByTimeRange(Integer pageNo, Integer pageSize, String sortField, String sortDir, LocalDateTime startTime, LocalDateTime endTime, String from) {
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ?
+                Sort.by(sortField).ascending() :
+                Sort.by(sortField).descending();
+        Pageable pageable = PageRequest.of(pageNo - 1, pageSize, sort);
+
+        Specification<Transaction> spec = Specification.where(null);
+        spec = spec.and(TransactionSpecifications.hasTimeRange(startTime, endTime));
+        if (from != null) {
+            if (from.equals("package")) {
+                spec = spec.and(TransactionSpecifications.hasFromPackage());
+            } else if (from.equals("movie")) {
+                spec = spec.and(TransactionSpecifications.hasFromMovie());
+            }
+        }
+        spec = spec.and(TransactionSpecifications.hasNoDeleteFlag());
+
+        return transactionRepository.findAll(spec, pageable);
+    }
+
+    public Double getTotalRevenueByTimeRange(LocalDateTime startTime, LocalDateTime endTime, String from) {
+        Specification<Transaction> spec = Specification.where(null);
+        spec = spec.and(TransactionSpecifications.hasTimeRange(startTime, endTime));
+        spec = spec.and(TransactionSpecifications.isSuccessTransaction());
+        spec = spec.and(TransactionSpecifications.hasNoDeleteFlag());
+
+        if (from != null) {
+            if (from.equals("package")) {
+                spec = spec.and(TransactionSpecifications.hasFromPackage());
+            } else if (from.equals("movie")) {
+                spec = spec.and(TransactionSpecifications.hasFromMovie());
+            }
+        }
+
+        List<Transaction> transactions = transactionRepository.findAll(spec);
+        double total = 0;
+        for (Transaction transaction : transactions) {
+            total += transaction.getAmount();
+        }
+        return total;
+    }
+
+    public long countTransactionsByTimeRange(LocalDateTime startTime, LocalDateTime endTime, String from) {
+        Specification<Transaction> spec = Specification.where(null);
+        spec = spec.and(TransactionSpecifications.hasTimeRange(startTime, endTime));
+        spec = spec.and(TransactionSpecifications.isSuccessTransaction());
+        spec = spec.and(TransactionSpecifications.hasNoDeleteFlag());
+
+        if (from != null) {
+            if (from.equals("package")) {
+                spec = spec.and(TransactionSpecifications.hasFromPackage());
+            } else if (from.equals("movie")) {
+                spec = spec.and(TransactionSpecifications.hasFromMovie());
+            }
+        }
+
+        return transactionRepository.count(spec);
     }
 
     public void createTransaction(TransactionRequest request) {
@@ -65,8 +144,8 @@ public class TransactionService {
         }
 
         transaction.setDeleteFlag(DEFAULT_DELETE_FLAG);
-        transaction.setCreatedAt(CURRENT_TIME);
-        transaction.setModifiedAt(CURRENT_TIME);
+        transaction.setCreatedAt(LocalDateTime.now());
+        transaction.setModifiedAt(LocalDateTime.now());
 
         transactionRepository.save(transaction);
     }
@@ -77,7 +156,7 @@ public class TransactionService {
             throw new RuntimeException("Transaction not found");
         }
         transaction.setStatus(status);
-        transaction.setModifiedAt(CURRENT_TIME);
+        transaction.setModifiedAt(LocalDateTime.now());
         transactionRepository.save(transaction);
     }
 

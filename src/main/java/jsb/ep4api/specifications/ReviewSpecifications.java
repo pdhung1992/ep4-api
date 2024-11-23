@@ -3,6 +3,8 @@ package jsb.ep4api.specifications;
 import jsb.ep4api.entities.Review;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.LocalDateTime;
+
 public class ReviewSpecifications {
     public static Specification<Review> hasId(Long id) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("id"), id);
@@ -37,6 +39,10 @@ public class ReviewSpecifications {
 
     public static Specification<Review> hasNoDeletedFlag() {
         return (root, query, criteriaBuilder) -> criteriaBuilder.isFalse(root.get("deleteFlag"));
+    }
+
+    public static Specification<Review> hasCreatedBetween(LocalDateTime startTime, LocalDateTime endTime) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("createdAt"), startTime, endTime);
     }
 
 }

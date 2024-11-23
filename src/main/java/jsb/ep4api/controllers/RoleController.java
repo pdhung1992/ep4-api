@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -149,8 +150,8 @@ public class RoleController {
             newRole.setBsColor(role.getBsColor());
             newRole.setDescription(role.getDescription());
             newRole.setDeleteFlag(DEFAULT_DELETE_FLAG);
-            newRole.setCreatedAt(CURRENT_TIME);
-            newRole.setModifiedAt(CURRENT_TIME);
+            newRole.setCreatedAt(LocalDateTime.now());
+            newRole.setModifiedAt(LocalDateTime.now());
 
             roleService.createRole(newRole);
 
@@ -183,7 +184,7 @@ public class RoleController {
             updateRole.setSlug(role.getSlug());
             updateRole.setBsColor(role.getBsColor());
             updateRole.setDescription(role.getDescription());
-            updateRole.setModifiedAt(CURRENT_TIME);
+            updateRole.setModifiedAt(LocalDateTime.now());
 
             roleService.updateRole(updateRole);
 
@@ -205,7 +206,7 @@ public class RoleController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ROLE_NOT_FOUND_MESSAGE);
             }
             deleteRole.setDeleteFlag(true);
-            deleteRole.setModifiedAt(CURRENT_TIME);
+            deleteRole.setModifiedAt(LocalDateTime.now());
 
             roleService.updateRole(deleteRole);
 
@@ -249,8 +250,8 @@ public class RoleController {
                     newRoleFunction.setRole(role);
                     newRoleFunction.setFunction(functionService.findFunctionById(functionId));
                     newRoleFunction.setDeleteFlag(DEFAULT_DELETE_FLAG);
-                    newRoleFunction.setCreatedAt(CURRENT_TIME);
-                    newRoleFunction.setModifiedAt(CURRENT_TIME);
+                    newRoleFunction.setCreatedAt(LocalDateTime.now());
+                    newRoleFunction.setModifiedAt(LocalDateTime.now());
                     roleFunctionService.createRoleFunction(newRoleFunction);
                 }
             }

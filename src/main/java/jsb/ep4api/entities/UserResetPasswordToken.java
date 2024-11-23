@@ -51,8 +51,8 @@ public class UserResetPasswordToken {
         this.token = UUID.randomUUID().toString();
         this.isUsed = DEFAULT_IS_USED;
         this.deleteFlag = DEFAULT_DELETE_FLAG;
-        this.createdAt = CURRENT_TIME;
-        this.modifiedAt = CURRENT_TIME;
+        this.createdAt = LocalDateTime.now();
+        this.modifiedAt = LocalDateTime.now();
         this.expiredAt = LocalDateTime.now().plusMinutes(10);
     }
 }

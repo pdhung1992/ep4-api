@@ -22,6 +22,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -152,8 +153,8 @@ public class AdminController {
             newAdmin.setAvatar(DEFAULT_AVATAR);
             newAdmin.setRole(role);
             newAdmin.setDeleteFlag(DEFAULT_DELETE_FLAG);
-            newAdmin.setCreatedAt(CURRENT_TIME);
-            newAdmin.setModifiedAt(CURRENT_TIME);
+            newAdmin.setCreatedAt(LocalDateTime.now());
+            newAdmin.setModifiedAt(LocalDateTime.now());
 
             adminService.createAdmin(newAdmin);
 
@@ -193,7 +194,7 @@ public class AdminController {
             updateAdmin.setFullName(updateRequest.getFullName());
             updateAdmin.setEmail(updateRequest.getEmail());
             updateAdmin.setRole(role);
-            updateAdmin.setModifiedAt(CURRENT_TIME);
+            updateAdmin.setModifiedAt(LocalDateTime.now());
 
             adminService.updateAdmin(updateAdmin);
 
@@ -214,7 +215,7 @@ public class AdminController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ADMIN_NOT_FOUND_MESSAGE);
             }
             deleteAdmin.setDeleteFlag(true);
-            deleteAdmin.setModifiedAt(CURRENT_TIME);
+            deleteAdmin.setModifiedAt(LocalDateTime.now());
 
             adminService.updateAdmin(deleteAdmin);
 

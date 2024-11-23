@@ -4,6 +4,7 @@ package jsb.ep4api.controllers;
 import jsb.ep4api.entities.Genre;
 import jsb.ep4api.payloads.responses.GenreResponse;
 import jsb.ep4api.services.GenreService;
+import jsb.ep4api.services.MovieGenreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,8 @@ import static jsb.ep4api.constants.Constants.INTERNAL_SERVER_ERROR_MESSAGE;
 public class GenreController {
     @Autowired
     private GenreService genreService;
+    @Autowired
+    private MovieGenreService movieGenreService;
 
     @GetMapping
     public ResponseEntity<?> getAllGenres() {
@@ -33,6 +36,8 @@ public class GenreController {
                         response.setDescription(genre.getDescription());
                         response.setImage(genre.getImage());
                         response.setSlug(genre.getSlug());
+                        int count = movieGenreService.countMoviesByGenreId(genre.getId());
+                        response.setTotalMovies(count);
                         return response;
                     }
             ).toList();

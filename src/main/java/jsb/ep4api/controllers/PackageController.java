@@ -17,6 +17,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -155,8 +156,8 @@ public class PackageController {
             newPackage.setExpirationUnit(createPackageRequest.getExpirationUnit());
             newPackage.setDescription(createPackageRequest.getDescription());
             newPackage.setSlug(createPackageRequest.getSlug());
-            newPackage.setCreatedAt(CURRENT_TIME);
-            newPackage.setModifiedAt(CURRENT_TIME);
+            newPackage.setCreatedAt(LocalDateTime.now());
+            newPackage.setModifiedAt(LocalDateTime.now());
             newPackage.setDeleteFlag(DEFAULT_DELETE_FLAG);
 
             packageService.createPackage(newPackage);
@@ -189,7 +190,7 @@ public class PackageController {
             packageToUpdate.setExpirationUnit(updatePackageRequest.getExpirationUnit());
             packageToUpdate.setDescription(updatePackageRequest.getDescription());
             packageToUpdate.setSlug(updatePackageRequest.getSlug());
-            packageToUpdate.setModifiedAt(CURRENT_TIME);
+            packageToUpdate.setModifiedAt(LocalDateTime.now());
 
             packageService.updatePackage(packageToUpdate);
 
@@ -210,7 +211,7 @@ public class PackageController {
             Package packageToDelete = packageService.getPackageById(id);
 
             packageToDelete.setDeleteFlag(true);
-            packageToDelete.setModifiedAt(CURRENT_TIME);
+            packageToDelete.setModifiedAt(LocalDateTime.now());
 
             packageService.deletePackage(packageToDelete);
 

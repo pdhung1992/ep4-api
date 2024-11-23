@@ -24,6 +24,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -190,8 +191,8 @@ public class StudioController {
             studio.setEstablishedYear(createStudioRequest.getEstablishedYear());
             studio.setSlug(createStudioRequest.getSlug());
             studio.setDeleteFlag(DEFAULT_DELETE_FLAG);
-            studio.setCreatedAt(CURRENT_TIME);
-            studio.setModifiedAt(CURRENT_TIME);
+            studio.setCreatedAt(LocalDateTime.now());
+            studio.setModifiedAt(LocalDateTime.now());
 
             studioService.createStudio(studio);
             return ResponseEntity.status(HttpStatus.CREATED).body(new RequestResponse(
@@ -272,7 +273,7 @@ public class StudioController {
             updateStudio.setCountry(country);
             updateStudio.setEstablishedYear(updateStudioRequest.getEstablishedYear());
             updateStudio.setSlug(updateStudioRequest.getSlug());
-            updateStudio.setModifiedAt(CURRENT_TIME);
+            updateStudio.setModifiedAt(LocalDateTime.now());
 
             studioService.updateStudio(updateStudio);
             return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(
@@ -309,7 +310,7 @@ public class StudioController {
             }
 
             deleteStudio.setDeleteFlag(true);
-            deleteStudio.setModifiedAt(CURRENT_TIME);
+            deleteStudio.setModifiedAt(LocalDateTime.now());
 
             studioService.updateStudio(deleteStudio);
             return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(

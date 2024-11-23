@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+
 import static jsb.ep4api.constants.Constants.*;
 
 @RestController
@@ -59,13 +61,13 @@ public class RatingController {
                 rating.setUser(user);
                 rating.setMovie(movie);
                 rating.setDeleteFlag(DEFAULT_DELETE_FLAG);
-                rating.setCreatedAt(CURRENT_TIME);
-                rating.setModifiedAt(CURRENT_TIME);
+                rating.setCreatedAt(LocalDateTime.now());
+                rating.setModifiedAt(LocalDateTime.now());
                 ratingService.saveRating(rating);
 
             } else {
                 rating.setValue(ratingRequest.getValue());
-                rating.setModifiedAt(CURRENT_TIME);
+                rating.setModifiedAt(LocalDateTime.now());
                 ratingService.saveRating(rating);
             }
 

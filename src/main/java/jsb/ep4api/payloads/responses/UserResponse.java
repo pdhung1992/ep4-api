@@ -10,9 +10,9 @@ public class UserResponse {
     private String fullName;
     private String phone;
     private String email;
-    private String avatar;
-    private Boolean verifyFlag;
     private Boolean isActive;
+    private String joinDate;
+    private String avatar;
 
     public UserResponse() {
         super();

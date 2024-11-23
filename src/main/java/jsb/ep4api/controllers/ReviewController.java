@@ -20,6 +20,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -236,8 +237,8 @@ public class ReviewController {
             review.setMovie(movie);
             review.setUser(user);
             review.setDeleteFlag(DEFAULT_DELETE_FLAG);
-            review.setCreatedAt(CURRENT_TIME);
-            review.setModifiedAt(CURRENT_TIME);
+            review.setCreatedAt(LocalDateTime.now());
+            review.setModifiedAt(LocalDateTime.now());
 
             reviewService.createReview(review);
 
@@ -285,7 +286,7 @@ public class ReviewController {
 
             review.setTitle(updateReviewRequest.getTitle());
             review.setContent(updateReviewRequest.getContent());
-            review.setModifiedAt(CURRENT_TIME);
+            review.setModifiedAt(LocalDateTime.now());
 
             reviewService.updateReview(review);
             return ResponseEntity.ok(new RequestResponse(

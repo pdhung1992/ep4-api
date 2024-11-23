@@ -19,9 +19,7 @@ public class ReviewRequest {
 
     private Long parentId;
 
-    @ValidId
     private Long movieId;
-
 
     private Long userId;
 

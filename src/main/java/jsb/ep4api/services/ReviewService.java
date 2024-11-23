@@ -11,6 +11,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Service
 public class ReviewService {
     @Autowired
@@ -78,6 +81,23 @@ public class ReviewService {
         spec = spec.and(ReviewSpecifications.hasNoDeletedFlag());
 
         return null;
+    }
+
+    public long countReviewsByTimeRange(LocalDateTime start, LocalDateTime end, Long movieId){
+        Specification<Review> spec = Specification.where(null);
+        spec = spec.and(ReviewSpecifications.hasCreatedBetween(start, end));
+        spec = spec.and(ReviewSpecifications.hasNoDeletedFlag());
+        if (movieId != null) {
+            spec = spec.and(ReviewSpecifications.hasMovieId(movieId));
+        }
+
+        long count = 0;
+        List<Review> reviews = reviewRepository.findAll(spec);
+        for (Review review : reviews) {
+            count++;
+        }
+
+        return count;
     }
 
     public void createReview(Review review){

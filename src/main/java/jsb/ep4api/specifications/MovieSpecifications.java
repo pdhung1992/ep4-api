@@ -24,6 +24,13 @@ public class MovieSpecifications {
         };
     }
 
+    public static Specification<Movie> orderByCreatedAtDesc() {
+        return (root, query, criteriaBuilder) -> {
+            query.orderBy(criteriaBuilder.desc(root.get("createdAt")));
+            return query.getRestriction();
+        };
+    }
+
     public static Specification<Movie> orderByViews() {
         return (root, query, criteriaBuilder) -> {
             query.orderBy(criteriaBuilder.desc(root.get("views")));

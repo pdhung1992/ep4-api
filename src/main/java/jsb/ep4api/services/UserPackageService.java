@@ -5,13 +5,19 @@ import jsb.ep4api.entities.Transaction;
 import jsb.ep4api.entities.User;
 import jsb.ep4api.entities.UserPackage;
 import jsb.ep4api.repositories.UserPackageRepository;
+import jsb.ep4api.specifications.UserMovieSpecification;
 import jsb.ep4api.specifications.UserPackageSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -81,26 +87,48 @@ public class UserPackageService {
         Package aPackage = transaction.getAPackage();
 
         UserPackage userPackage = getUserPackageByUserIdAndPackageId(user.getId(), aPackage.getId());
+
+        LocalDateTime current = LocalDateTime.now();
+
         if (userPackage != null) {
-            if (userPackage.getExpiredAt().isAfter(CURRENT_TIME)) {
+            if (userPackage.getExpiredAt().isAfter(current) && userPackage.getExpiredAt().isBefore(current.plusDays(aPackage.getExpirationUnit() - 1 ))) {
                 userPackage.setExpiredAt(userPackage.getExpiredAt().plusDays(aPackage.getExpirationUnit()));
-                userPackage.setModifiedAt(CURRENT_TIME);
-                updateUserPackage(userPackage);
-            } else {
-                userPackage.setExpiredAt(CURRENT_TIME.plusDays(aPackage.getExpirationUnit()));
-                userPackage.setModifiedAt(CURRENT_TIME);
-                updateUserPackage(userPackage);
+            } else if (userPackage.getExpiredAt().isBefore(current)) {
+                userPackage.setExpiredAt(current.plusDays(aPackage.getExpirationUnit()));
             }
+            userPackage.setModifiedAt(current);
+            updateUserPackage(userPackage);
         } else {
             userPackage = new UserPackage();
             userPackage.setUser(user);
             userPackage.setAPackage(aPackage);
-            userPackage.setExpiredAt(CURRENT_TIME.plusDays(aPackage.getExpirationUnit()));
+            userPackage.setExpiredAt(current.plusDays(aPackage.getExpirationUnit()));
             userPackage.setDeleteFlag(DEFAULT_DELETE_FLAG);
-            userPackage.setCreatedAt(CURRENT_TIME);
-            userPackage.setModifiedAt(CURRENT_TIME);
+            userPackage.setCreatedAt(current);
+            userPackage.setModifiedAt(current);
             createUserPackage(userPackage);
         }
+    }
+
+    public Page<UserPackage> getUserPackagesByUserId(Long userId, Boolean isExpired, Integer pageNo, Integer pageSize, String sortField, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ?
+                Sort.by(sortField).ascending() :
+                Sort.by(sortField).descending();
+        Pageable pageable = PageRequest.of(pageNo - 1, pageSize, sort);
+
+        Specification<UserPackage> spec = Specification.where(null);
+        spec = spec.and(UserPackageSpecifications.hasUserId(userId));
+        spec = spec.and(UserPackageSpecifications.hasNoDeletedFlag());
+
+        if (isExpired != null) {
+            if (isExpired) {
+                spec = spec.and(UserPackageSpecifications.hasExpired());
+            } else {
+                spec = spec.and(UserPackageSpecifications.hasNotExpired());
+            }
+        }
+
+        return userPackageRepository.findAll(spec, pageable);
     }
 
     public void createUserPackage(UserPackage userPackage) {

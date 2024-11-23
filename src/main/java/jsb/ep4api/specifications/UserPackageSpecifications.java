@@ -1,5 +1,4 @@
 package jsb.ep4api.specifications;
-
 import jsb.ep4api.entities.UserPackage;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -14,6 +13,10 @@ public class UserPackageSpecifications {
 
     public static Specification<UserPackage> hasNotExpired() {
         return (root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("expiredAt"), java.time.LocalDateTime.now());
+    }
+
+    public static Specification<UserPackage> hasExpired() {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.lessThan(root.get("expiredAt"), java.time.LocalDateTime.now());
     }
 
     public static Specification<UserPackage> hasNoDeletedFlag() {

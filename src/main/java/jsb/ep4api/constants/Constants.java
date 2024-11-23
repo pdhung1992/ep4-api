@@ -11,6 +11,10 @@ public class Constants {
     public static final String ROLE_USER = "ROLE_USER";
     public static final long MOVIE_MANAGEMENT_FUNCTION = 1;
     public static final long ACCOUNT_MANAGEMENT_FUNCTION = 6;
+    public static final long USER_MANAGEMENT_FUNCTION = 19;
+    public static final long ROLE_MANAGEMENT_FUNCTION = 11;
+    public static final long REPORT_MANAGEMENT_FUNCTION = 22;
+    public static final long PACKAGE_MANAGEMENT_FUNCTION = 26;
 
 
     //Default values
@@ -32,10 +36,6 @@ public class Constants {
     public static final boolean IS_PACKAGE = true;
 
     public static final String DEFAULT_EXPIRED_TIME = "30 Days";
-    public static final LocalDateTime CURRENT_TIME = LocalDateTime.now();
-    public static final LocalDateTime EXPIRED_30_DAYS = CURRENT_TIME.plusDays(30);
-    public static final LocalDateTime EXPIRED_90_DAYS = CURRENT_TIME.plusDays(90);
-    public static final LocalDateTime EXPIRED_180_DAYS = CURRENT_TIME.plusDays(180);
 
     public static final String DEFAULT_AVATAR = "blank_avatar.png";
     public static final String DEFAULT_POSTER = "blank_poster.png";

@@ -56,6 +56,15 @@ public class MovieGenreService {
         return movieGenres.stream().map(movieGenre -> movieGenre.getMovie().getId()).toList();
     }
 
+    public int countMoviesByGenreId(Long genreId) {
+        Specification<MovieGenre> spec = Specification.where(null);
+        spec = spec.and(MovieGenreSpecifications.hasGenreId(genreId));
+        spec = spec.and(MovieGenreSpecifications.hasNoDeletedFlag());
+
+        List<MovieGenre> movieGenres = movieGenreRepository.findAll(spec);
+        return movieGenres.size();
+    }
+
     public void createMovieGenre(MovieGenre movieGenre) {
         movieGenreRepository.save(movieGenre);
     }
