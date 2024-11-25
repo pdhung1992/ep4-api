@@ -71,6 +71,14 @@ public class TransactionService {
         return transactionRepository.findAll(spec, pageable);
     }
 
+    public  List<Transaction> getTransactionByMonth(LocalDateTime startTime, LocalDateTime endTime) {
+        Specification<Transaction> spec = Specification.where(null);
+        spec = spec.and(TransactionSpecifications.hasTimeRange(startTime, endTime));
+        spec = spec.and(TransactionSpecifications.hasNoDeleteFlag());
+
+        return transactionRepository.findAll(spec);
+    }
+
     public Double getTotalRevenueByTimeRange(LocalDateTime startTime, LocalDateTime endTime, String from) {
         Specification<Transaction> spec = Specification.where(null);
         spec = spec.and(TransactionSpecifications.hasTimeRange(startTime, endTime));

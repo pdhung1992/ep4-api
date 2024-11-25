@@ -3,6 +3,7 @@ package jsb.ep4api.controllers;
 import jakarta.validation.Valid;
 import jsb.ep4api.entities.Movie;
 import jsb.ep4api.entities.Review;
+import jsb.ep4api.entities.ReviewReaction;
 import jsb.ep4api.entities.User;
 import jsb.ep4api.payloads.requests.ReviewRequest;
 import jsb.ep4api.payloads.responses.RequestResponse;
@@ -46,15 +47,10 @@ public class ReviewController {
     public ResponseEntity<?> getReviewsByMovieId(
             @RequestParam(required = false) Integer pageNo,
             @RequestParam(required = false) Integer pageSize,
+            @RequestParam(required = false) Long userId,
             @PathVariable String slug
     ) {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            Long userId = null;
-            if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImp) {
-                UserDetailsImp userDetailsImp = (UserDetailsImp) authentication.getPrincipal();
-                userId = userDetailsImp.getId();
-            }
 
             if (pageNo == null) {
                 pageNo = 1;
@@ -78,6 +74,14 @@ public class ReviewController {
             if (!reviewList.isEmpty()) {
                 for (Review review : reviewList) {
                     ReviewResponse reviewResponse = new ReviewResponse();
+                    User user = review.getUser();
+                    if (user != null) {
+                        reviewResponse.setUserId(user.getId());
+                        reviewResponse.setUserName(user.getFullName());
+                    } else {
+                        reviewResponse.setUserId(null);
+                        reviewResponse.setUserName("Anonymous");
+                    }
                     int rating = ratingService.getRatingValueByUserIdAndMovieId(review.getUser().getId(), movie.getId());
                     Long replyCount = reviewService.getReviewCountByParentId(review.getId());
                     reviewResponse.setId(review.getId());
@@ -86,14 +90,15 @@ public class ReviewController {
                     reviewResponse.setRating(rating);
                     reviewResponse.setParentId(review.getParentId());
                     reviewResponse.setMovieId(review.getMovie().getId());
-                    reviewResponse.setUserId(review.getUser().getId());
-                    reviewResponse.setUserName(review.getUser().getFullName());
                     reviewResponse.setLikeCount(reviewReactionService.countReviewLikesByReviewId(review.getId()));
                     reviewResponse.setDislikeCount(reviewReactionService.countReviewDislikesByReviewId(review.getId()));
                     if (userId != null) {
-                        Boolean userReaction = reviewReactionService.checkUserReaction(review.getId(), userId);
-                        System.out.println("userReaction: " + userReaction);
-                        reviewResponse.setUserReaction(reviewReactionService.checkUserReaction(review.getId(), userId));
+                        ReviewReaction reviewReaction = reviewReactionService.getReviewReactionByReviewIdAndUserId(review.getId(), userId);
+                        if (reviewReaction != null) {
+                            reviewResponse.setUserReaction(reviewReaction.getReactionType());
+                        } else {
+                            reviewResponse.setUserReaction(null);
+                        }
                     }
                     reviewResponse.setCreatedAt(review.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
                     reviewResponse.setReplyCount(replyCount);
@@ -131,16 +136,10 @@ public class ReviewController {
     public ResponseEntity<?> getReviewsByParentId(
             @RequestParam(required = false) Integer pageNo,
             @RequestParam(required = false) Integer pageSize,
+            @RequestParam(required = false) Long userId,
             @PathVariable Long parentId
     ) {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            Long userId = null;
-            if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImp) {
-                UserDetailsImp userDetailsImp = (UserDetailsImp) authentication.getPrincipal();
-                userId = userDetailsImp.getId();
-            }
-
             if (pageNo == null) {
                 pageNo = 1;
             }
@@ -155,6 +154,14 @@ public class ReviewController {
             if (!reviewList.isEmpty()) {
                 for (Review review : reviewList) {
                     ReviewResponse reviewResponse = new ReviewResponse();
+                    User user = review.getUser();
+                    if (user != null) {
+                        reviewResponse.setUserId(user.getId());
+                        reviewResponse.setUserName(user.getFullName());
+                    } else {
+                        reviewResponse.setUserId(null);
+                        reviewResponse.setUserName("Anonymous");
+                    }
                     Review parentReview = reviewService.getReviewById(review.getParentId());
                     String replyTo = parentReview.getUser().getFullName();
                     reviewResponse.setId(review.getId());
@@ -162,14 +169,15 @@ public class ReviewController {
                     reviewResponse.setContent(review.getContent());
                     reviewResponse.setParentId(review.getParentId());
                     reviewResponse.setMovieId(review.getMovie().getId());
-                    reviewResponse.setUserId(review.getUser().getId());
-                    reviewResponse.setUserName(review.getUser().getFullName());
                     reviewResponse.setLikeCount(reviewReactionService.countReviewLikesByReviewId(review.getId()));
                     reviewResponse.setDislikeCount(reviewReactionService.countReviewDislikesByReviewId(review.getId()));
                     if (userId != null) {
-                        Boolean userReaction = reviewReactionService.checkUserReaction(review.getId(), userId);
-                        System.out.println("userReaction: " + userReaction);
-                        reviewResponse.setUserReaction(reviewReactionService.checkUserReaction(review.getId(), userId));
+                        ReviewReaction reviewReaction = reviewReactionService.getReviewReactionByReviewIdAndUserId(review.getId(), userId);
+                        if (reviewReaction != null) {
+                            reviewResponse.setUserReaction(reviewReaction.getReactionType());
+                        } else {
+                            reviewResponse.setUserReaction(null);
+                        }
                     }
                     reviewResponse.setCreatedAt(review.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
                     reviewResponse.setReplyTo(replyTo);

@@ -141,6 +141,10 @@ public class AuthController {
             String jwt = jwtUtils.generateUserJwtToken(authentication);
             UserDetailsImp userDetails = (UserDetailsImp) authentication.getPrincipal();
 
+            if (!userDetails.isActive()){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(USER_BLOCK_STATUS_MESSAGE);
+            }
+
             UserJwtResponse userJwtResponse = new UserJwtResponse();
             userJwtResponse.setToken(jwt);
             userJwtResponse.setId(userDetails.getId());

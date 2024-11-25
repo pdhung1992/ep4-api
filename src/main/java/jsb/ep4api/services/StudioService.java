@@ -56,6 +56,13 @@ public class StudioService {
         return studioRepository.findOne(spec).orElse(null);
     }
 
+    public boolean checkExistSlug(String slug){
+        Specification<Studio> spec = Specification.where(null);
+        spec = spec.and(StudioSpecifications.hasSlug(slug));
+        spec = spec.and(StudioSpecifications.hasNoDeletedFlag());
+        return studioRepository.findOne(spec).isPresent();
+    }
+
     public void createStudio(Studio studio){
         studioRepository.save(studio);
     }

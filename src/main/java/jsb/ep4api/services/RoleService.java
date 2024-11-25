@@ -42,6 +42,10 @@ public class RoleService {
         return roleRepository.findAll(spec);
     }
 
+    public Boolean checkExistSlug(String slug) {
+        return roleRepository.existsBySlug(slug);
+    }
+
     public Role findRoleById(Long id) {
         return roleRepository.findById(id).orElse(null);
     }

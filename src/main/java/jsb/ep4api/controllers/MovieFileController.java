@@ -55,6 +55,14 @@ public class MovieFileController {
                         MOVIE_NOT_FOUND_MESSAGE
                 ));
             }
+
+            if ("Coming soon".equals(movie.getCategory().getName())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new RequestResponse(
+                        HttpStatus.FORBIDDEN.value(),
+                        MOVIE_COMING_SOON_MESSAGE
+                ));
+            }
+
             Long movieId = movie.getId();
             Long packageId = movie.getAPackage().getId();
 

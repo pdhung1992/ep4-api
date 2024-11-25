@@ -22,15 +22,17 @@ public class UserDetailsImp implements UserDetails {
     @JsonIgnore
     private String password;
     private String avatar;
+    private boolean isActive;
 
 
-    public UserDetailsImp(Long id, String fullName, String phone, String email, String password, String avatar, Collection<? extends GrantedAuthority> authorities) {
+    public UserDetailsImp(Long id, String fullName, String phone, String email, String password, String avatar, boolean isActive, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.fullName = fullName;
         this.phone = phone;
         this.email = email;
         this.password = password;
         this.avatar = avatar;
+        this.isActive = isActive;
     }
 
     @Override

@@ -33,4 +33,7 @@ public class MovieFileService {
     public void createMovieFile(MovieFile movieFile) {
         movieFileRepository.save(movieFile);
     }
+    public void updateMovieFile(MovieFile movieFile) {
+        movieFileRepository.save(movieFile);
+    }
 }

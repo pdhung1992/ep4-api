@@ -21,4 +21,8 @@ public class TransactionResponse {
     private Long movieId;
     private String movieTitle;
     private LocalDateTime createdAt;
+
+    public TransactionResponse(){
+        super();
+    }
 }

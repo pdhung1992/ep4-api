@@ -35,4 +35,8 @@ public class PackageSpecifications {
     public static Specification<Package> hasNoDeleteFlag() {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("deleteFlag"), false);
     }
+
+    public static Specification<Package> hasSlug(String slug) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("slug"), slug);
+    }
 }

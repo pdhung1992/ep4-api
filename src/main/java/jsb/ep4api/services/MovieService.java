@@ -79,6 +79,7 @@ public class MovieService {
         Specification<Movie> spec = Specification.where(null);
         spec = spec.and(MovieSpecifications.hasNoDeletedFlag());
         spec = spec.and(MovieSpecifications.hasShowAtHomeFlag(true));
+        spec = spec.and(MovieSpecifications.hasShowFlag(true));
         spec = spec.and(MovieSpecifications.randomOrder());
         return movieRepository.findAll(spec);
     }
@@ -86,6 +87,7 @@ public class MovieService {
     public List<Movie> get10MoviesByCategoryId(Long categoryId) {
         Specification<Movie> spec = Specification.where(null);
         spec = spec.and(MovieSpecifications.belongsToCategory(categoryId));
+        spec = spec.and(MovieSpecifications.hasShowFlag(true));
         spec = spec.and(MovieSpecifications.hasNoDeletedFlag());
         Pageable pageable = PageRequest.of(0, 10);
         return movieRepository.findAll(spec, pageable).getContent();
@@ -94,6 +96,7 @@ public class MovieService {
     public List<Movie> get4MoviesByCategoryId(Long categoryId, Long movieId) {
         Specification<Movie> spec = Specification.where(null);
         spec = spec.and(MovieSpecifications.belongsToCategory(categoryId));
+        spec = spec.and(MovieSpecifications.hasShowFlag(true));
         spec = spec.and(MovieSpecifications.hasNoDeletedFlag());
         spec = spec.and(MovieSpecifications.randomOrder());
         spec = spec.and(MovieSpecifications.hasIdNot(movieId));
@@ -104,6 +107,7 @@ public class MovieService {
     public List<Movie> get10MoviesBestByGenreId(List<Long> genreIds) {
         Specification<Movie> spec = Specification.where(null);
         spec = spec.and(MovieSpecifications.hasIdIn(genreIds));
+        spec = spec.and(MovieSpecifications.hasShowFlag(true));
         spec = spec.and(MovieSpecifications.hasNoDeletedFlag());
         spec = spec.and(MovieSpecifications.orderByViews());
         Pageable pageable = PageRequest.of(0, 10);
@@ -113,6 +117,7 @@ public class MovieService {
     public List<Movie> getMoviesByGenreId(int pageNo, int pageSize, List<Long> genreIds) {
         Specification<Movie> spec = Specification.where(null);
         spec = spec.and(MovieSpecifications.hasIdIn(genreIds));
+        spec = spec.and(MovieSpecifications.hasShowFlag(true));
         spec = spec.and(MovieSpecifications.hasNoDeletedFlag());
         spec = spec.and(MovieSpecifications.orderByCreatedAtDesc());
         Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
@@ -129,6 +134,7 @@ public class MovieService {
     public Movie getMovieBySlug(String slug) {
         Specification<Movie> spec = Specification.where(null);
         spec = spec.and(MovieSpecifications.hasSlug(slug));
+        spec = spec.and(MovieSpecifications.hasShowFlag(true));
         spec = spec.and(MovieSpecifications.hasNoDeletedFlag());
         return movieRepository.findOne(spec).orElse(null);
     }
@@ -146,6 +152,7 @@ public class MovieService {
         Specification<Movie> spec = Specification.where(null);
         spec = spec.and(MovieSpecifications.titleContains(title));
         spec = spec.or(MovieSpecifications.originalTitleContains(title));
+        spec = spec.and(MovieSpecifications.hasShowFlag(true));
         spec = spec.and(MovieSpecifications.hasNoDeletedFlag());
         spec = spec.and(MovieSpecifications.orderByCreatedAtDesc());
         Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
@@ -163,6 +170,13 @@ public class MovieService {
         }
 
         return totalView;
+    }
+
+    public boolean checkExistSlug(String slug) {
+        Specification<Movie> spec = Specification.where(null);
+        spec = spec.and(MovieSpecifications.hasSlug(slug));
+        spec = spec.and(MovieSpecifications.hasNoDeletedFlag());
+        return movieRepository.findOne(spec).isPresent();
     }
 
     public void createMovie(Movie movie) {

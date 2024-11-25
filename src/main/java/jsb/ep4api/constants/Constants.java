@@ -95,6 +95,8 @@ public class Constants {
     public static final String USER_DELETED_MESSAGE = "User deleted successfully!";
     public static final String USER_DELETE_FAIL_MESSAGE = "Delete failed! Error: ";
 
+    public static final String USER_BLOCK_STATUS_MESSAGE = "Your account was blocked. Contact administrator to get information.";
+
     public static final String ADMIN_NOT_FOUND_MESSAGE = "Admin not found!";
     public static final String UPDATE_ADMIN_SUCCESS_MESSAGE = "Admin updated successfully!";
     public static final String UPDATE_ADMIN_FAIL_MESSAGE = "Update failed! Error: ";
@@ -195,6 +197,7 @@ public class Constants {
     public static final String DELETE_MOVIE_FILE_SUCCESS_MESSAGE = "Movie file deleted successfully!";
     public static final String DELETE_MOVIE_FILE_FAIL_MESSAGE = "Delete failed! Error: ";
     public static final String MOVIE_FILE_NOT_FOUND_MESSAGE = "Movie file not found!";
+    public static final String MOVIE_COMING_SOON_MESSAGE = "This movie is coming soon. Please wait for the release date!";
 
     public static final String CREATE_CAST_SUCCESS_MESSAGE = "Cast created successfully!";
     public static final String CREATE_CAST_FAIL_MESSAGE = "Create failed! Error: ";

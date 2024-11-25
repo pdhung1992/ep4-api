@@ -45,8 +45,8 @@ public class MovieResponse {
     private List<CastResponse> mainCasts;
     private List<GenreResponse> genres;
     private List<CrewMemberResponse> crewMembers;
-    private List<String> languages;
-
+    private List<LanguageResponse> languages;
+    private List<String> languagesString;
     public MovieResponse() {
     }
 }

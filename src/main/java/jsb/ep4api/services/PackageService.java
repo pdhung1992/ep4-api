@@ -71,6 +71,14 @@ public class PackageService {
         return packageRepository.findOne(spec).isPresent();
     }
 
+    public boolean checkExistSlug(String slug){
+        Specification<Package> spec = Specification.where(null);
+        spec = spec.and(PackageSpecifications.hasSlug(slug));
+        spec = spec.and(PackageSpecifications.hasNoDeleteFlag());
+
+        return packageRepository.findOne(spec).isPresent();
+    }
+
     public void createPackage(Package pkg){
         packageRepository.save(pkg);
     }

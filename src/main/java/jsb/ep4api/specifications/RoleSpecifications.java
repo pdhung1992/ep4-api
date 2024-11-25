@@ -13,7 +13,20 @@ public class RoleSpecifications {
         };
     }
 
+    public static Specification<Role> hasNameInclude(String name) {
+        return (root, query, criteriaBuilder) -> {
+            String nameInclude = "%" + name + "%";
+            return criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), nameInclude);
+        };
+    }
+
     public static Specification<Role> hasSlug(String slug) {
+        return (root, query, criteriaBuilder) -> {
+            return criteriaBuilder.equal(criteriaBuilder.lower(root.get("slug")), slug);
+        };
+    }
+
+    public static Specification<Role> hasSlugInclude(String slug) {
         return (root, query, criteriaBuilder) -> {
             String slugInclude = "%" + slug + "%";
             return criteriaBuilder.like(criteriaBuilder.lower(root.get("slug")), slugInclude);

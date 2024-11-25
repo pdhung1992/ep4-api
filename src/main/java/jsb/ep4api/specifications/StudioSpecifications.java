@@ -23,4 +23,8 @@ public class StudioSpecifications {
     public static Specification<Studio> hasNoDeletedFlag() {
         return (root, query, criteriaBuilder) -> criteriaBuilder.isFalse(root.get("deleteFlag"));
     }
+
+    public static Specification<Studio> hasSlug(String slug) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("slug"), slug);
+    }
 }

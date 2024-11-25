@@ -25,7 +25,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         Optional<User> userOptional = userRepository.findByPhoneOrEmail(username);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            return new UserDetailsImp(user.getId(), user.getFullName(), user.getPhone(), user.getEmail(), user.getPassword(), user.getAvatar(), null);
+            return new UserDetailsImp(user.getId(), user.getFullName(), user.getPhone(), user.getEmail(), user.getPassword(), user.getAvatar(), user.isActive(), null);
         } else {
             Optional<Admin> adminOptional = adminRepository.findByUsername(username);
             if (adminOptional.isPresent()) {

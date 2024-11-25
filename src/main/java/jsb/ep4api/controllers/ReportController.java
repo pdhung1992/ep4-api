@@ -1,15 +1,14 @@
 package jsb.ep4api.controllers;
 
 
+import jakarta.servlet.http.HttpServletResponse;
 import jsb.ep4api.config.HasFunctionAccessToClass;
 import jsb.ep4api.entities.MovieMonthlyReport;
 import jsb.ep4api.entities.Transaction;
+import jsb.ep4api.payloads.responses.RevenueByDayResponse;
 import jsb.ep4api.payloads.responses.SpecResponse;
 import jsb.ep4api.payloads.responses.TransactionResponse;
-import jsb.ep4api.services.MovieMonthlyReportService;
-import jsb.ep4api.services.MovieService;
-import jsb.ep4api.services.ReviewService;
-import jsb.ep4api.services.TransactionService;
+import jsb.ep4api.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -19,13 +18,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.FileOutputStream;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static java.util.stream.Collectors.groupingBy;
 import static jsb.ep4api.constants.Constants.REPORT_MANAGEMENT_FUNCTION;
 
 @RestController
@@ -44,6 +47,9 @@ public class ReportController {
     @Autowired
     MovieService movieService;
 
+    @Autowired
+    ExcelExportService excelExportService;
+
     @GetMapping("/revenue/transactions")
     public ResponseEntity<?> getRevenueByMonth(
             @RequestParam(required = false) Integer pageNo,
@@ -61,7 +67,7 @@ public class ReportController {
                 pageSize = 10;
             }
             if (sortField == null) {
-                sortField = "id";
+                sortField = "createdAt";
             }
             if (sortDir == null) {
                 sortDir = "asc";
@@ -218,6 +224,69 @@ public class ReportController {
         }
     }
 
+    @GetMapping("/revenue/export")
+    public ResponseEntity<?> exportRevenueByMonth(
+            @RequestParam(required = false) String month,
+            HttpServletResponse httpServletResponse
+    ) {
+        try {
+            LocalDateTime startOfMonth;
+            LocalDateTime endOfMonth;
+            //Time
+            if (month != null && !month.trim().isEmpty()) {
+                YearMonth yearMonth = YearMonth.parse(month, DateTimeFormatter.ofPattern("yyyy-MM"));
+                startOfMonth = yearMonth.atDay(1).atStartOfDay();
+                endOfMonth = yearMonth.atEndOfMonth().atTime(23, 59, 59);
+            } else {
+                YearMonth currentMonth = YearMonth.now();
+                startOfMonth = currentMonth.atDay(1).atStartOfDay();
+                endOfMonth = currentMonth.atEndOfMonth().atTime(23, 59, 59);
+            }
+
+            List<Transaction> transactions = transactionService.getTransactionByMonth(startOfMonth, endOfMonth);
+            List<TransactionResponse> responses = new ArrayList<>();
+            for (Transaction transaction : transactions) {
+                TransactionResponse response = new TransactionResponse();
+                response.setId(transaction.getId());
+                response.setCode(transaction.getCode());
+                response.setAmount(transaction.getAmount());
+                response.setGateway(transaction.getGateway());
+                response.setStatus(transaction.getStatus());
+                response.setUserId(transaction.getUser().getId());
+                response.setIsPackage(transaction.getIsPackage());
+                if (transaction.getAPackage() != null) {
+                    response.setPackageId(transaction.getAPackage().getId());
+                    response.setPackageName(transaction.getAPackage().getPackageName());
+                } else {
+                    response.setPackageId(null);
+                    response.setPackageName("Unknown Package");
+                }
+
+                if (transaction.getMovie() != null) {
+                    response.setMovieId(transaction.getMovie().getId());
+                    response.setMovieTitle(transaction.getMovie().getTitle());
+                } else {
+                    response.setMovieId(null);
+                    response.setMovieTitle("Unknown Movie");
+                }
+                response.setCreatedAt(transaction.getCreatedAt());
+
+                responses.add(response);
+            }
+
+            String fileName = "transactions_" + month + ".xlsx";
+            httpServletResponse.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            httpServletResponse.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+
+            excelExportService.exportTransactions(responses, httpServletResponse.getOutputStream());
+
+            httpServletResponse.flushBuffer();
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @GetMapping("/dashboard/statistics")
     public ResponseEntity<?> getDashboardStatistics(
             @RequestParam(required = false) String month
@@ -298,6 +367,49 @@ public class ReportController {
             response.put("reviewsDifference", reviewsDifference);
 
             return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/dashboard/revenue")
+    public ResponseEntity<?> getRevenueDayByDay(
+            @RequestParam(required = false) String month
+    ) {
+        try {
+            LocalDateTime startOfMonth;
+            LocalDateTime endOfMonth;
+            //Time
+            if (month != null && !month.trim().isEmpty()) {
+                YearMonth yearMonth = YearMonth.parse(month, DateTimeFormatter.ofPattern("yyyy-MM"));
+                startOfMonth = yearMonth.atDay(1).atStartOfDay();
+                endOfMonth = yearMonth.atEndOfMonth().atTime(23, 59, 59);
+            } else {
+                YearMonth currentMonth = YearMonth.now();
+                startOfMonth = currentMonth.atDay(1).atStartOfDay();
+                endOfMonth = currentMonth.atEndOfMonth().atTime(23, 59, 59);
+            }
+
+            List<Transaction> transactions = transactionService.getTransactionByMonth(startOfMonth, endOfMonth);
+            Map<LocalDate, List<Transaction>> groupByDate = new HashMap<>();
+            groupByDate = transactions.stream().collect(groupingBy(transaction -> transaction.getCreatedAt().toLocalDate()));
+
+            List<RevenueByDayResponse> responses = new ArrayList<>();
+            for (Map.Entry<LocalDate, List<Transaction>> entry : groupByDate.entrySet()) {
+                LocalDate date = entry.getKey();
+                List<Transaction> dailyTrans = entry.getValue();
+                double totalRevenue = 0.0;
+                for (Transaction transaction : dailyTrans) {
+                    totalRevenue += transaction.getAmount();
+                }
+                RevenueByDayResponse response = new RevenueByDayResponse();
+                response.setDate(date.toString());
+                response.setRevenue(totalRevenue);
+                response.setTransactions(dailyTrans.size());
+                responses.add(response);
+            }
+
+            return ResponseEntity.ok(responses);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

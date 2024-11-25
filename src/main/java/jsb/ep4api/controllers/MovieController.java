@@ -125,6 +125,7 @@ public class MovieController {
                 movieResponse.setShowAtHome(movie.isShowAtHome());
                 movieResponse.setPoster(movie.getPoster());
                 movieResponse.setSlug(movie.getSlug());
+                movieResponse.setViews(movie.getViews());
 
                 movieResponses.add(movieResponse);
             }
@@ -171,6 +172,7 @@ public class MovieController {
             movieResponse.setOriginalTitle(movie.getOriginalTitle());
             movieResponse.setCanRent(movie.isCanRent());
             movieResponse.setPrice(movie.getPrice());
+            movieResponse.setPackageId(movie.getAPackage().getId());
             movieResponse.setPackageName(movie.getAPackage().getPackageName());
             movieResponse.setViews(movie.getViews());
             movieResponse.setStoryLine(movie.getStoryline());
@@ -186,6 +188,12 @@ public class MovieController {
             movieResponse.setCategory(movie.getCategory().getName());
             movieResponse.setShowAtHome(movie.isShowAtHome());
             movieResponse.setShow(movie.isShow());
+            movieResponse.setSlug(movie.getSlug());
+            movieResponse.setCountryId(movie.getCountry().getId());
+            movieResponse.setStudioId(movie.getStudio().getId());
+            movieResponse.setVideoModeId(movie.getVideoMode().getId());
+            movieResponse.setClassificationId(movie.getClassification().getId());
+            movieResponse.setCategoryId(movie.getCategory().getId());
 
             List<MovieGenre> movieGenres = movieGenreService.getMovieGenresByMovieId(id);
             List<GenreResponse> genres = new ArrayList<>();
@@ -199,11 +207,45 @@ public class MovieController {
             movieResponse.setGenres(genres);
 
             List<MovieLanguage> movieLanguages = movieLanguageService.getMovieLanguagesByMovieId(id);
-            List<String> languageResponses = new ArrayList<>();
+            List<LanguageResponse> languageResponses = new ArrayList<>();
             for (MovieLanguage movieLanguage : movieLanguages) {
-                languageResponses.add(movieLanguage.getLanguage().getNativeName());
+                LanguageResponse languageResponse = new LanguageResponse();
+                languageResponse.setId(movieLanguage.getLanguage().getId());
+                languageResponse.setName(movieLanguage.getLanguage().getName());
+                languageResponse.setNativeName(movieLanguage.getLanguage().getNativeName());
+                languageResponses.add(languageResponse);
             }
             movieResponse.setLanguages(languageResponses);
+
+            List<MovieFile> movieFiles = movieFileService.getMovieFilesByMovieId(id);
+            List<MovieFileResponse> movieFileResponses = new ArrayList<>();
+            for (MovieFile movieFile : movieFiles) {
+                MovieFileResponse movieFileResponse = new MovieFileResponse();
+                movieFileResponse.setId(movieFile.getId());
+                movieFileResponse.setTitle(movieFile.getTitle());
+                movieFileResponse.setFileName(movieFile.getFileName());
+                movieFileResponse.setThumbnail(movieFile.getThumbnail());
+                movieFileResponses.add(movieFileResponse);
+            }
+            movieResponse.setFiles(movieFileResponses);
+
+            List<Cast> casts = castService.getMainCastsByMovieId(movie.getId());
+            List<CastResponse> castResponses = new ArrayList<>();
+            for (Cast cast : casts) {
+                CastResponse castResponse = new CastResponse();
+                castResponse.setId(cast.getId());
+                castResponse.setActorName(cast.getActorName());
+                castResponse.setCharacterName(cast.getCharacterName());
+                castResponse.setMain(cast.isMain());
+                castResponses.add(castResponse);
+            }
+            movieResponse.setMainCasts(castResponses);
+
+            CrewMember director = crewMemberService.getDirectorByMovieId(movie.getId());
+            if (director != null) {
+                movieResponse.setDirector(director.getName());
+            }
+
             return ResponseEntity.ok(movieResponse);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -581,7 +623,7 @@ public class MovieController {
             for (MovieLanguage movieLanguage : movieLanguages) {
                 languageResponses.add(movieLanguage.getLanguage().getNativeName());
             }
-            movieResponse.setLanguages(languageResponses);
+            movieResponse.setLanguagesString(languageResponses);
 
             List<MovieFile> movieFiles = movieFileService.getMovieFilesByMovieId(movie.getId());
             List<MovieFileResponse> movieFileResponses = new ArrayList<>();
@@ -1003,7 +1045,6 @@ public class MovieController {
     @PutMapping("/update")
     @HasFunctionAccessToFunction(MOVIE_MANAGEMENT_FUNCTION)
     public ResponseEntity<?> updateMovie(
-            @Valid
             @RequestParam("id") Long id,
             @RequestParam("title") String title,
             @RequestParam("originalTitle") String originalTitle,
@@ -1023,20 +1064,17 @@ public class MovieController {
             @RequestParam("isShow") Boolean isShow,
             @RequestParam("isShowAtHome") Boolean isShowAtHome,
             @RequestParam("genreIds") String genreIdsJson,
-            @RequestParam("movieFiles") List<MultipartFile> movieFiles,
-            @RequestParam("thumbnails") List<MultipartFile> thumbnails,
-            @RequestParam("languageIds") String languageIdsJson,
-            @RequestParam("casts") String castsJson,
-            @RequestParam("crewMembers") String crewJson,
-            BindingResult result
+            @RequestParam(value = "movieFiles", required = false) List<MultipartFile> movieFiles,
+            @RequestParam(value = "thumbnails", required = false) List<MultipartFile> thumbnails,
+            @RequestParam("languageIds") String languageIdsJson
     ){
         try {
-            if (result.hasErrors()) {
-                List<String> errorMessages = result.getAllErrors().stream()
-                        .map(ObjectError::getDefaultMessage)
-                        .collect(Collectors.toList());
-                return ResponseEntity.badRequest().body(errorMessages);
-            }
+//            if (result.hasErrors()) {
+//                List<String> errorMessages = result.getAllErrors().stream()
+//                        .map(ObjectError::getDefaultMessage)
+//                        .collect(Collectors.toList());
+//                return ResponseEntity.badRequest().body(errorMessages);
+//            }
 
             Movie updateMovie = movieService.getMovieById(id);
             if (updateMovie == null) {
@@ -1158,14 +1196,28 @@ public class MovieController {
             //Handle genres
             if (genreIdsJson != null) {
                 List<Long> genreIds = objectMapper.readValue(genreIdsJson, new TypeReference<List<Long>>() {});
-                for (Long genreId : genreIds) {
-                    Genre genre = genreService.getGenreById(genreId);
-                    if (genre == null) {
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(GENRE_NOT_FOUND_MESSAGE);
+                List<MovieGenre> existingMovieGenres = movieGenreService.getMovieGenresByMovieId(updateMovie.getId());
+
+                for (MovieGenre movieGenre : existingMovieGenres) {
+                    Long genreId = movieGenre.getGenre().getId();
+                    if (!genreIds.contains(genreId)) {
+                        movieGenre.setDeleteFlag(true);
+                        movieGenre.setModifiedAt(LocalDateTime.now());
+                        movieGenreService.updateMovieGenre(movieGenre);
                     }
-                    MovieGenre movieGenre = movieGenreService.getMovieGenreByMovieIdAndGenreId(updateMovie.getId(), genreId);
-                    if (movieGenre == null) {
-                        movieGenre = new MovieGenre();
+                }
+
+                for (Long genreId : genreIds) {
+                    boolean exists = existingMovieGenres.stream()
+                            .anyMatch(movieGenre -> movieGenre.getGenre().getId().equals(genreId));
+
+                    if (!exists) {
+                        Genre genre = genreService.getGenreById(genreId);
+                        if (genre == null) {
+                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(GENRE_NOT_FOUND_MESSAGE);
+                        }
+
+                        MovieGenre movieGenre = new MovieGenre();
                         movieGenre.setMovie(updateMovie);
                         movieGenre.setGenre(genre);
                         movieGenre.setDeleteFlag(DEFAULT_DELETE_FLAG);
@@ -1173,25 +1225,36 @@ public class MovieController {
                         movieGenre.setModifiedAt(LocalDateTime.now());
 
                         movieGenreService.createMovieGenre(movieGenre);
-                    } else {
-                        movieGenre.setDeleteFlag(DEFAULT_DELETE_FLAG);
-                        movieGenre.setModifiedAt(LocalDateTime.now());
-                        movieGenreService.deleteMovieGenre(movieGenre);
                     }
                 }
             }
 
+
             //Handle languages
             if (languageIdsJson != null) {
                 List<Long> languageIds = objectMapper.readValue(languageIdsJson, new TypeReference<List<Long>>() {});
-                for (Long languageId : languageIds) {
-                    Language language = languageService.getLanguageById(languageId);
-                    if (language == null) {
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(LANGUAGE_NOT_FOUND_MESSAGE);
+                List<MovieLanguage> existingMovieLanguages = movieLanguageService.getMovieLanguagesByMovieId(updateMovie.getId());
+
+                for (MovieLanguage movieLanguage : existingMovieLanguages) {
+                    Long languageId = movieLanguage.getLanguage().getId();
+                    if (!languageIds.contains(languageId)) {
+                        movieLanguage.setDeleteFlag(true);
+                        movieLanguage.setModifiedAt(LocalDateTime.now());
+                        movieLanguageService.updateMovieLanguage(movieLanguage);
                     }
-                    MovieLanguage movieLanguage = movieLanguageService.getMovieLanguageByMovieIdAndLanguageId(updateMovie.getId(), languageId);
-                    if (movieLanguage == null) {
-                        movieLanguage = new MovieLanguage();
+                }
+
+                for (Long languageId : languageIds) {
+                    boolean exists = existingMovieLanguages.stream()
+                            .anyMatch(movieLanguage -> movieLanguage.getLanguage().getId().equals(languageId));
+
+                    if (!exists) {
+                        Language language = languageService.getLanguageById(languageId);
+                        if (language == null) {
+                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(LANGUAGE_NOT_FOUND_MESSAGE);
+                        }
+
+                        MovieLanguage movieLanguage = new MovieLanguage();
                         movieLanguage.setMovie(updateMovie);
                         movieLanguage.setLanguage(language);
                         movieLanguage.setDeleteFlag(DEFAULT_DELETE_FLAG);
@@ -1199,31 +1262,52 @@ public class MovieController {
                         movieLanguage.setModifiedAt(LocalDateTime.now());
 
                         movieLanguageService.createMovieLanguage(movieLanguage);
-                    } else {
-                        movieLanguage.setDeleteFlag(DEFAULT_DELETE_FLAG);
-                        movieLanguage.setModifiedAt(LocalDateTime.now());
-                        movieLanguageService.deleteMovieLanguage(movieLanguage);
                     }
                 }
             }
 
+
             //Handle MovieFiles
             if (movieFiles != null){
-                List<MovieFileRequest> movieFileRequests = new ArrayList<>();
+//                List<MovieFileRequest> movieFileRequests = new ArrayList<>();
+                MultipartFile file = movieFiles.get(0);
+                MultipartFile thumbnail = thumbnails.get(0);
+                File uploadDir = new File(DEFAULT_UPLOAD_VIDEO_DIR);
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdirs();
+                }
 
+                List<MovieFile> existingMovieFiles = movieFileService.getMovieFilesByMovieId(updateMovie.getId());
+                for (MovieFile movieFile : existingMovieFiles) {
+                    File oldFile = new File(uploadDir.getAbsolutePath() + "/" + movieFile.getFileName());
+                    if (oldFile.exists()) {
+                        oldFile.delete();
+                    }
 
-            }
+                    File oldThumbnail = new File(uploadDir.getAbsolutePath() + "/" + movieFile.getThumbnail());
+                    if (oldThumbnail.exists()) {
+                        oldThumbnail.delete();
+                    }
+                }
 
-            //Handle Casts
-            if (castsJson != null) {
-                List<CastRequest> castRequests = objectMapper.readValue(castsJson, new TypeReference<List<CastRequest>>() {});
+                String fileOriginalFilename = file.getOriginalFilename();
+                String fileExtension = fileOriginalFilename.substring(fileOriginalFilename.lastIndexOf("."));
+                String fileUniqFilename = System.currentTimeMillis() + fileExtension;
+                String filePath = uploadDir.getAbsolutePath() + "/" + fileUniqFilename;
+                Files.copy(file.getInputStream(), Paths.get(filePath), StandardCopyOption.REPLACE_EXISTING);
 
-            }
+                String thumbnailOriginalFilename = thumbnail.getOriginalFilename();
+                String thumbnailFileExtension = thumbnailOriginalFilename.substring(thumbnailOriginalFilename.lastIndexOf("."));
+                String thumbnailUniqFilename = System.currentTimeMillis() + thumbnailFileExtension;
+                String thumbnailPath = uploadDir.getAbsolutePath() + "/" + thumbnailUniqFilename;
+                Files.copy(thumbnail.getInputStream(), Paths.get(thumbnailPath), StandardCopyOption.REPLACE_EXISTING);
 
-            //Handle CrewMembers
-            if (crewJson != null) {
-                List<CrewMemberRequest> crewMemberRequests = objectMapper.readValue(crewJson, new TypeReference<List<CrewMemberRequest>>() {});
+                existingMovieFiles.get(0).setFileName(fileUniqFilename);
+                existingMovieFiles.get(0).setThumbnail(thumbnailUniqFilename);
+                existingMovieFiles.get(0).setTitle("Episode 1");
+                existingMovieFiles.get(0).setModifiedAt(LocalDateTime.now());
 
+                movieFileService.updateMovieFile(existingMovieFiles.get(0));
             }
 
             return ResponseEntity.status(HttpStatus.OK).body(new RequestResponse(
